@@ -26,7 +26,8 @@ type ProxyFileConfig struct {
 }
 
 type ProxyDirConfig struct {
-	Dir string `yaml:"dir"`
+	Dir       string       `yaml:"dir"`
+	IndexFile []*IndexFile `yaml:"indexfile"`
 }
 
 type ProxyAPIConfig struct {
@@ -37,9 +38,29 @@ type ProxyAPIConfig struct {
 
 func (p *ProxyConfig) setDefault() {
 	p.BasePath = utils.ProcessPath(p.BasePath)
-	fmt.Printf("TAG NB [%s]\n", p.BasePath)
 
 	if p.Type == ProxyTypeAPI {
+		if len(p.IndexFile) == 0 {
+			p.IndexFile = []*IndexFile{
+				{
+					Regex: "disable",
+					File:  "index.html",
+				},
+				{
+					Regex: "disable",
+					File:  "index.xml",
+				},
+				{
+					Regex: "disable",
+					File:  "index.txt",
+				},
+				{
+					Regex: "enable",
+					File:  `^index\.\S+$`,
+				},
+			}
+		}
+	} else if p.Type == ProxyTypeAPI {
 		p.PrefixPath = utils.ProcessPath(p.PrefixPath)
 	}
 }
@@ -53,6 +74,10 @@ func (p *ProxyConfig) check() ConfigError {
 		if !utils.IsDir(p.Dir) {
 			return NewConfigError(fmt.Sprintf("dir path %s not exist", p.Dir))
 		}
+
+		if len(p.IndexFile) == 0 {
+			return NewConfigError("index file is empty")
+		}
 	} else if p.Type == ProxyTypeAPI {
 		_, err := url.Parse(p.Address)
 		if err != nil {
@@ -61,6 +86,5 @@ func (p *ProxyConfig) check() ConfigError {
 	} else {
 		return NewConfigError("proxy type must be file or dir or api")
 	}
-	fmt.Printf("TAG CC [%s]\n", p.BasePath)
 	return nil
 }

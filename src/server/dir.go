@@ -12,7 +12,7 @@ import (
 
 const IndexMaxDeep = 5
 
-func (s *HTTPServer) dirServer(rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		s.abortMethodNotAllowed(w)
 		return
@@ -37,7 +37,7 @@ func (s *HTTPServer) dirServer(rule *config.ProxyConfig, w http.ResponseWriter, 
 	}
 
 	if !utils.IsFile(filePath) {
-		filePath = s.getIndexFile(filePath)
+		filePath = s.getIndexFile(ruleIndex, filePath)
 	}
 
 	if filePath == "" || !utils.IsFile(filePath) {
@@ -66,11 +66,11 @@ func (s *HTTPServer) dirServer(rule *config.ProxyConfig, w http.ResponseWriter, 
 	w.Header().Set("Content-Type", mimeType.String())
 }
 
-func (s *HTTPServer) getIndexFile(dir string) string {
-	return s._getIndexFile(dir, IndexMaxDeep)
+func (s *HTTPServer) getIndexFile(ruleIndex int, dir string) string {
+	return s._getIndexFile(ruleIndex, dir, IndexMaxDeep)
 }
 
-func (s *HTTPServer) _getIndexFile(dir string, deep int) string {
+func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 	if deep == 0 {
 		return ""
 	}
@@ -84,31 +84,38 @@ func (s *HTTPServer) _getIndexFile(dir string, deep int) string {
 		return ""
 	}
 
-	var nextDir os.DirEntry = nil
-	var indexHTML os.DirEntry = nil
-	var indexXML os.DirEntry = nil
-	var index os.DirEntry = nil
+	var indexDirNum = 0
+	var indexDir os.DirEntry = nil
 
-	for _, i := range lst {
-		if i.IsDir() {
-			nextDir = i
-		} else if i.Name() == "index.html" {
-			indexHTML = i
-		} else if i.Name() == "index.xml" {
-			indexXML = i
-		} else if strings.HasPrefix(i.Name(), "index.") {
-			index = i
+	var indexFileNum = 0
+	var indexFile os.DirEntry = nil
+
+	_, err = s.cfg.IndexFile.ForEach(ruleIndex, func(file *config.IndexFileCompile) (any, error) {
+		for _, i := range lst {
+			if file.CheckDirEntry(i) {
+				if i.IsDir() {
+					if file.Index > indexDirNum {
+						indexDirNum = file.Index
+						indexDir = i
+					}
+				} else {
+					if file.Index > indexFileNum {
+						indexFileNum = file.Index
+						indexFile = i
+					}
+				}
+			}
 		}
+		return nil, nil
+	})
+	if err != nil {
+		return ""
 	}
 
-	if indexHTML != nil {
-		return path.Join(dir, indexHTML.Name())
-	} else if indexXML != nil {
-		return path.Join(dir, indexXML.Name())
-	} else if index != nil {
-		return path.Join(dir, index.Name())
-	} else if nextDir != nil {
-		return s._getIndexFile(path.Join(dir, nextDir.Name()), deep-1)
+	if indexFile != nil {
+		return path.Join(dir, indexFile.Name())
+	} else if indexDir != nil {
+		return s._getIndexFile(ruleIndex, path.Join(dir, indexDir.Name()), deep-1)
 	} else {
 		return ""
 	}

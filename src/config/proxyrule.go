@@ -9,24 +9,29 @@ type ProxyRuleConfig struct {
 func (r *ProxyRuleConfig) setDefault() {
 	for _, rule := range r.Rules {
 		rule.setDefault()
-		fmt.Printf("TAG DD [%s]\n", rule.BasePath)
 	}
-	fmt.Printf("TAG DDAA [%s]\n", r.Rules[0].BasePath)
 }
 
-func (r *ProxyRuleConfig) check(ps *ProxyServerConfig) ConfigError {
+func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ifile *IndexFileCompileList) ConfigError {
 	if len(r.Rules) == 0 {
 		return NewConfigError("proxy rule is empty")
 	}
 
-	for index, rule := range r.Rules {
+	for ruleIndex, rule := range r.Rules {
 		err := rule.check()
 		if err != nil && err.IsError() {
 			return err
 		}
 
-		if rule.Type == ProxyTypeAPI {
-			err := ps.Add(index, rule)
+		if rule.Type == ProxyTypeDir {
+			for fileIndex, file := range rule.IndexFile {
+				err := ifile.Add(ruleIndex, fileIndex, file)
+				if err != nil {
+					return NewConfigError(fmt.Sprintf("index file %s error", err.Error()))
+				}
+			}
+		} else if rule.Type == ProxyTypeAPI {
+			err := ps.Add(ruleIndex, rule)
 			if err != nil {
 				return NewConfigError(fmt.Sprintf("proxy server can not create: %s", err.Error()))
 			}

@@ -10,6 +10,7 @@ type ConfigStruct struct {
 	Yaml        YamlConfig
 	CoreOrigin  CorsOrigin
 	ProxyServer ProxyServerConfig
+	IndexFile   IndexFileCompileList
 }
 
 func (c *ConfigStruct) init() error {
@@ -36,6 +37,11 @@ func (c *ConfigStruct) init() error {
 	if err != nil {
 		return err
 	}
+
+	err = c.IndexFile.init()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -58,7 +64,7 @@ func (c *ConfigStruct) setDefault() {
 }
 
 func (c *ConfigStruct) check() (err ConfigError) {
-	err = c.Yaml.check(&c.CoreOrigin, &c.ProxyServer)
+	err = c.Yaml.check(&c.CoreOrigin, &c.ProxyServer, &c.IndexFile)
 	if err != nil && err.IsError() {
 		return err
 	}

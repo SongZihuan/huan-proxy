@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -21,10 +20,9 @@ func (y *YamlConfig) setDefault() {
 	y.GlobalConfig.setDefault()
 	y.Http.setDefault(&y.GlobalConfig)
 	y.Rules.setDefault()
-	fmt.Printf("TAG DDCC [%s]\n", y.Rules.Rules[0].BasePath)
 }
 
-func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig) (err ConfigError) {
+func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig, ifile *IndexFileCompileList) (err ConfigError) {
 	err = y.GlobalConfig.check()
 	if err != nil && err.IsError() {
 		return err
@@ -35,7 +33,7 @@ func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig) (err ConfigErr
 		return err
 	}
 
-	err = y.Rules.check(ps)
+	err = y.Rules.check(ps, ifile)
 	if err != nil && err.IsError() {
 		return err
 	}

@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func (s *HTTPServer) apiServer(index int, rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
-	proxy := s.cfg.ProxyServer.Get(index)
+func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
+	proxy := s.cfg.ProxyServer.Get(ruleIndex)
 	if proxy == nil {
 		s.abortServerError(w)
 		return

@@ -52,10 +52,9 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	func() {
-		for index, rule := range s.cfg.Yaml.Rules.Rules {
+		for ruleIndex, rule := range s.cfg.Yaml.Rules.Rules {
 			if rule.Type == config.ProxyTypeFile {
 				url := utils.ProcessPath(r.URL.Path)
-				logger.Tagf("A [%s] [%s]", url, rule.BasePath)
 				if url == rule.BasePath {
 					if s.corsHandler(w, r) {
 						s.fileServer(rule, w, r)
@@ -67,7 +66,7 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					urlpath := utils.ProcessPath(r.URL.Path)
 					if urlpath == rule.BasePath || strings.HasPrefix(urlpath, rule.BasePath+"/") {
 						if s.corsHandler(w, r) {
-							s.dirServer(rule, w, r)
+							s.dirServer(ruleIndex, rule, w, r)
 						}
 						return
 					}
@@ -75,7 +74,7 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			} else if rule.File == config.ProxyTypeAPI {
 				urlpath := utils.ProcessPath(r.URL.Path)
 				if urlpath == rule.BasePath || strings.HasPrefix(urlpath, rule.BasePath+"/") {
-					s.apiServer(index, rule, w, r)
+					s.apiServer(ruleIndex, rule, w, r)
 					return
 				}
 			} else {
