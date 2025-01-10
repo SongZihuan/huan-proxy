@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/utils"
 	"os"
 )
 
@@ -24,8 +25,9 @@ var levelMap = map[string]bool{
 }
 
 type GlobalConfig struct {
-	Mode     string `json:"mode"`
-	LogLevel string `json:"loglevel"`
+	Mode     string           `json:"mode"`
+	LogLevel string           `json:"loglevel"`
+	LogTag   utils.StringBool `json:"logtag"`
 }
 
 func (g *GlobalConfig) setDefault() {
@@ -41,8 +43,10 @@ func (g *GlobalConfig) setDefault() {
 
 	if g.LogLevel == "" && (g.Mode == DebugMode || g.Mode == TestMode) {
 		g.LogLevel = "debug"
+		g.LogTag.SetDefaultEanble()
 	} else if g.LogLevel == "" {
 		g.LogLevel = "warn"
+		g.LogTag.SetDefaultDisable()
 	}
 
 	return
