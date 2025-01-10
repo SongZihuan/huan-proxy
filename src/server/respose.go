@@ -1,13 +1,26 @@
 package server
 
 import (
+	"fmt"
 	resource "github.com/SongZihuan/huan-proxy"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net/http"
+	"strings"
 )
 
-func (s *HTTPServer) writeHuanProxyHeader(w http.ResponseWriter) {
-	w.Header().Set("HuanProxy", utils.StringToOnlyPrint(resource.Version))
+const XHuanProxyHeaer = "X-Huan-Proxy"
+
+func (s *HTTPServer) writeHuanProxyHeader(w http.ResponseWriter, r *http.Request) {
+	version := strings.TrimSpace(utils.StringToOnlyPrint(resource.Version))
+	h := r.Header.Get(XHuanProxyHeaer)
+	if h == "" {
+		h = version
+	} else {
+		h = fmt.Sprintf("%s, %s", h, version)
+	}
+
+	r.Header.Set(XHuanProxyHeaer, h)
+	w.Header().Set(XHuanProxyHeaer, h)
 }
 
 func (s *HTTPServer) abortForbidden(w http.ResponseWriter) {

@@ -46,7 +46,7 @@ func (s *HTTPServer) run() error {
 }
 
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.writeHuanProxyHeader(w)
+	s.writeHuanProxyHeader(w, r)
 	if !s.checkProxyTrust(w, r) {
 		return
 	}
