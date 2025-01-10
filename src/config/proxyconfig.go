@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net/url"
+	"strings"
 )
 
 const (
@@ -31,9 +32,10 @@ type ProxyDirConfig struct {
 }
 
 type ProxyAPIConfig struct {
-	Address    string           `yaml:"address"`
-	PrefixPath string           `yaml:"prefixpath"`
-	EnableSSL  utils.StringBool `yaml:"enablessl"`
+	Address       string           `yaml:"address"`
+	AddPrefixPath string           `yaml:"addprefixpath"`
+	SubPrefixPath string           `yaml:"subprefixpath"`
+	EnableSSL     utils.StringBool `yaml:"enablessl"`
 }
 
 func (p *ProxyConfig) setDefault() {
@@ -61,7 +63,8 @@ func (p *ProxyConfig) setDefault() {
 			}
 		}
 	} else if p.Type == ProxyTypeAPI {
-		p.PrefixPath = utils.ProcessPath(p.PrefixPath)
+		p.AddPrefixPath = utils.ProcessPath(p.AddPrefixPath)
+		p.SubPrefixPath = utils.ProcessPath(p.SubPrefixPath)
 	}
 }
 
@@ -83,6 +86,11 @@ func (p *ProxyConfig) check() ConfigError {
 		if err != nil {
 			return NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
 		}
+
+		if strings.HasPrefix(p.BasePath, p.SubPrefixPath) {
+			return NewConfigError("sub prefix path error")
+		}
+
 	} else {
 		return NewConfigError("proxy type must be file or dir or api")
 	}

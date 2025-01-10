@@ -26,7 +26,15 @@ func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 
 	r.URL.Scheme = targetURL.Scheme
 	r.URL.Host = targetURL.Host
-	r.URL.Path = rule.PrefixPath + r.URL.Path
+
+	path := r.URL.Path
+	if !strings.HasPrefix(path, rule.SubPrefixPath) {
+		s.abortServerError(w)
+		return
+	}
+	path = path[len(rule.SubPrefixPath):]
+	path = rule.AddPrefixPath + path
+	r.URL.Path = path
 
 	proxy.ServeHTTP(w, r) // 反向代理
 }
