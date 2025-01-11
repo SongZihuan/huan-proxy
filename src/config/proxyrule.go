@@ -1,6 +1,8 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type ProxyRuleConfig struct {
 	Rules []*ProxyConfig `yaml:"rules"`
@@ -12,7 +14,7 @@ func (r *ProxyRuleConfig) setDefault() {
 	}
 }
 
-func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ifile *IndexFileCompileList) ConfigError {
+func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ixfile *IndexFileCompileList, igfile *IgnoreFileCompileList) ConfigError {
 	if len(r.Rules) == 0 {
 		return NewConfigError("proxy rule is empty")
 	}
@@ -25,9 +27,16 @@ func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ifile *IndexFileCompileLi
 
 		if rule.Type == ProxyTypeDir {
 			for fileIndex, file := range rule.IndexFile {
-				err := ifile.Add(ruleIndex, fileIndex, file)
+				err := ixfile.Add(ruleIndex, fileIndex, file)
 				if err != nil {
 					return NewConfigError(fmt.Sprintf("index file %s error", err.Error()))
+				}
+			}
+
+			for fileIndex, file := range rule.IgnoreFile {
+				err := igfile.Add(ruleIndex, fileIndex, file)
+				if err != nil {
+					return NewConfigError(fmt.Sprintf("ignore file %s error", err.Error()))
 				}
 			}
 		} else if rule.Type == ProxyTypeAPI {

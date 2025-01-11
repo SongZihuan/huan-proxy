@@ -82,9 +82,9 @@ func (i *IndexFileCompileList) Add(ruleIndex int, fileIndex int, ifile *IndexFil
 	return nil
 }
 
-type ForEachFunc func(indexFile *IndexFileCompile) (any, error)
+type IndexForEachFunc func(indexFile *IndexFileCompile) (any, error)
 
-func (i *IndexFileCompileList) ForEach(ruleIndex int, fn ForEachFunc) (any, error) {
+func (i *IndexFileCompileList) ForEach(ruleIndex int, fn IndexForEachFunc) (any, error) {
 	lst := i.Map[ruleIndex]
 	if lst == nil {
 		return nil, fmt.Errorf("rule not found")

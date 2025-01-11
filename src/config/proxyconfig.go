@@ -27,8 +27,9 @@ type ProxyFileConfig struct {
 }
 
 type ProxyDirConfig struct {
-	Dir       string       `yaml:"dir"`
-	IndexFile []*IndexFile `yaml:"indexfile"`
+	Dir        string        `yaml:"dir"`
+	IndexFile  []*IndexFile  `yaml:"indexfile"`
+	IgnoreFile []*IgnoreFile `yaml:"ignorefile"`
 }
 
 type ProxyAPIConfig struct {
@@ -46,7 +47,7 @@ func (p *ProxyConfig) setDefault() {
 			p.IndexFile = []*IndexFile{
 				{
 					Regex: "disable",
-					File:  "index.htmlx",
+					File:  "index.html",
 				},
 				{
 					Regex: "disable",

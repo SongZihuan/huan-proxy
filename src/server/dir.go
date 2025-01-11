@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/gabriel-vasile/mimetype"
@@ -11,6 +12,7 @@ import (
 )
 
 const IndexMaxDeep = 5
+const DefaultIgnoreFileMap = 20
 
 func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
@@ -84,6 +86,21 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 		return ""
 	}
 
+	var ignoreFileMap = make(map[string]bool, DefaultIgnoreFileMap)
+
+	_, err = s.cfg.IgnoreFile.ForEach(ruleIndex, func(file *config.IgnoreFileCompile) (any, error) {
+		for _, i := range lst {
+			fmt.Println(file.IsRegex, file.StringFile, i.Name(), file.StringFile == i.Name())
+			if file.CheckDirEntry(i) {
+				ignoreFileMap[i.Name()] = true
+			}
+		}
+		return nil, nil
+	})
+	if err != nil {
+		return ""
+	}
+
 	var indexDirNum = -1
 	var indexDir os.DirEntry = nil
 
@@ -92,6 +109,10 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 
 	_, err = s.cfg.IndexFile.ForEach(ruleIndex, func(file *config.IndexFileCompile) (any, error) {
 		for _, i := range lst {
+			if _, ok := ignoreFileMap[i.Name()]; ok {
+				continue
+			}
+
 			if file.CheckDirEntry(i) {
 				if i.IsDir() {
 					if indexDirNum == -1 || file.Index < indexDirNum {
