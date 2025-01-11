@@ -12,7 +12,7 @@ type RemoteTrustConfig struct {
 
 func (p *RemoteTrustConfig) setDefault(global *GlobalConfig) {
 	if global.IsDebug() || global.IsTest() {
-		p.RemoteTrust.SetDefaultEanble()
+		p.RemoteTrust.SetDefaultEnable()
 	} else {
 		p.RemoteTrust.SetDefaultDisable()
 	}

@@ -49,7 +49,7 @@ func MainV1() int {
 	}
 
 	logger.Executable()
-	logger.Infof("run mode: %s\n", cfg.Yaml.GlobalConfig.GetGinMode())
+	logger.Infof("run mode: %s", cfg.Yaml.GlobalConfig.GetRunMode())
 
 	ser := server.NewServer()
 

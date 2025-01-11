@@ -21,13 +21,16 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 	}
 
 	dirBasePath := rule.Dir
+	fileBase := ""
 	filePath := ""
 
 	url := utils.ProcessPath(r.URL.Path)
 	if url == rule.BasePath {
 		filePath = dirBasePath
+		fileBase = ""
 	} else if strings.HasPrefix(url, rule.BasePath+"/") {
-		filePath = path.Join(dirBasePath, url[len(rule.BasePath+"/"):])
+		fileBase = url[len(rule.BasePath+"/"):]
+		filePath = path.Join(dirBasePath, fileBase)
 	} else {
 		s.abortNotFound(w)
 		return
@@ -39,8 +42,26 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 	}
 
 	if !utils.IsFile(filePath) {
+		fmt.Printf("A filePath: %s, %d\n", filePath, len(filePath))
 		filePath = s.getIndexFile(ruleIndex, filePath)
+		fmt.Printf("B filePath: %s, %d\n", filePath, len(filePath))
+		//fileBase = filePath[len(rule.BasePath+"/"):len(filePath)]
+	} else if fileBase != "" {
+		ignore, err := s.cfg.IgnoreFile.ForEach(ruleIndex, func(file *config.IgnoreFileCompile) (any, error) {
+			if file.CheckName(fileBase) {
+				return true, nil
+			}
+			return nil, nil
+		})
+		if err != nil {
+			s.abortNotFound(w)
+			return
+		} else if ig, ok := ignore.(bool); ok && ig {
+			filePath = s.getIndexFile(ruleIndex, filePath)
+		}
 	}
+
+	// 接下来的部分不在使用fileBase
 
 	if filePath == "" || !utils.IsFile(filePath) {
 		s.abortNotFound(w)
@@ -69,14 +90,15 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 }
 
 func (s *HTTPServer) getIndexFile(ruleIndex int, dir string) string {
-	return s._getIndexFile(ruleIndex, dir, IndexMaxDeep)
+	return s._getIndexFile(ruleIndex, dir, "", IndexMaxDeep)
 }
 
-func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
+func (s *HTTPServer) _getIndexFile(ruleIndex int, baseDir string, nextDir string, deep int) string {
 	if deep == 0 {
 		return ""
 	}
 
+	dir := path.Join(baseDir, nextDir)
 	if !utils.IsDir(dir) {
 		return ""
 	}
@@ -90,9 +112,9 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 
 	_, err = s.cfg.IgnoreFile.ForEach(ruleIndex, func(file *config.IgnoreFileCompile) (any, error) {
 		for _, i := range lst {
-			fmt.Println(file.IsRegex, file.StringFile, i.Name(), file.StringFile == i.Name())
-			if file.CheckDirEntry(i) {
-				ignoreFileMap[i.Name()] = true
+			fileName := path.Join(nextDir, i.Name())
+			if file.CheckName(fileName) {
+				ignoreFileMap[fileName] = true
 			}
 		}
 		return nil, nil
@@ -109,7 +131,9 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 
 	_, err = s.cfg.IndexFile.ForEach(ruleIndex, func(file *config.IndexFileCompile) (any, error) {
 		for _, i := range lst {
-			if _, ok := ignoreFileMap[i.Name()]; ok {
+			fileName := path.Join(nextDir, i.Name())
+
+			if _, ok := ignoreFileMap[fileName]; ok {
 				continue
 			}
 
@@ -136,7 +160,7 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 	if indexFile != nil {
 		return path.Join(dir, indexFile.Name())
 	} else if indexDir != nil {
-		return s._getIndexFile(ruleIndex, path.Join(dir, indexDir.Name()), deep-1)
+		return s._getIndexFile(ruleIndex, dir, indexDir.Name(), deep-1)
 	} else {
 		return ""
 	}
