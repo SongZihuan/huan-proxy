@@ -1,6 +1,8 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+)
 
 type StringBool string
 
@@ -18,6 +20,7 @@ func (s *StringBool) is(v StringBool, defaultVal ...bool) (res bool) {
 	if !s.check() {
 		if len(defaultVal) == 1 {
 			res = defaultVal[0]
+			return
 		} else {
 			return false
 		}
@@ -42,7 +45,7 @@ func (s *StringBool) setDefault(v StringBool) {
 	}
 }
 
-func (s *StringBool) SetDefaultEanble() {
+func (s *StringBool) SetDefaultEnable() {
 	s.setDefault(enable)
 }
 

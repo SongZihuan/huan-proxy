@@ -43,9 +43,13 @@ func (g *GlobalConfig) setDefault() {
 
 	if g.LogLevel == "" && (g.Mode == DebugMode || g.Mode == TestMode) {
 		g.LogLevel = "debug"
-		g.LogTag.SetDefaultEanble()
 	} else if g.LogLevel == "" {
 		g.LogLevel = "warn"
+	}
+
+	if g.Mode == DebugMode || g.Mode == TestMode {
+		g.LogTag.SetDefaultEnable()
+	} else {
 		g.LogTag.SetDefaultDisable()
 	}
 
@@ -64,7 +68,7 @@ func (g *GlobalConfig) check() ConfigError {
 	return nil
 }
 
-func (g *GlobalConfig) GetGinMode() string {
+func (g *GlobalConfig) GetRunMode() string {
 	return g.Mode
 }
 
