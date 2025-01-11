@@ -61,7 +61,7 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					}
 					return
 				}
-			} else if rule.Type == config.ProxyTypeFile {
+			} else if rule.Type == config.ProxyTypeDir {
 				if r.Method == http.MethodGet {
 					urlpath := utils.ProcessPath(r.URL.Path)
 					if urlpath == rule.BasePath || strings.HasPrefix(urlpath, rule.BasePath+"/") {
@@ -77,8 +77,6 @@ func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					s.apiServer(ruleIndex, rule, w, r)
 					return
 				}
-			} else {
-				s.abortNotFound(w)
 			}
 		}
 

@@ -1,28 +1,39 @@
 package utils
 
+import "strings"
+
 type StringBool string
 
 const enable StringBool = "enable"
 const disable StringBool = "disable"
+const enableBool StringBool = "true"
+const disableBool StringBool = "false"
 
 func (s *StringBool) check() bool {
-	return *s == enable || *s == disable
+	*s = StringBool(strings.ToLower(string(*s)))
+	return *s == enable || *s == disable || *s == enableBool || *s == disableBool
 }
 
-func (s *StringBool) is(v StringBool) bool {
+func (s *StringBool) is(v StringBool, defaultVal ...bool) (res bool) {
 	if !s.check() {
-		panic("bad value")
+		if len(defaultVal) == 1 {
+			res = defaultVal[0]
+		} else {
+			return false
+		}
 	}
 
 	return *s == v
 }
 
-func (s *StringBool) IsEnable() bool {
-	return s.is(enable)
+func (s *StringBool) IsEnable(defaultVal ...bool) (res bool) {
+	res = s.is(enable, defaultVal...) || s.is(enableBool, defaultVal...)
+	return
 }
 
-func (s *StringBool) IsDisable() bool {
-	return s.is(disable)
+func (s *StringBool) IsDisable(defaultVal ...bool) (res bool) {
+	res = s.is(disable, defaultVal...) || s.is(disableBool, defaultVal...)
+	return
 }
 
 func (s *StringBool) setDefault(v StringBool) {
@@ -40,36 +51,26 @@ func (s *StringBool) SetDefaultDisable() {
 }
 
 func (s *StringBool) ToString() string {
-	return s.ToStringDefaultEnable()
-}
-
-func (s *StringBool) ToStringDefaultEnable() string {
-	if s.check() {
-		return string(*s)
+	if s.IsEnable() {
+		return string(enable)
 	}
-
-	return string(enable)
-}
-
-func (s *StringBool) ToStringDefaultDisable() string {
-	if s.check() {
-		return string(*s)
-	}
-
 	return string(disable)
 }
 
-func (s *StringBool) ToBool(defaultVal ...bool) (res bool) {
-	defer func() {
-		if e := recover(); e != nil {
-			if len(defaultVal) == 1 {
-				res = defaultVal[0]
-			} else {
-				panic(e)
-			}
-		}
-	}()
+func (s *StringBool) ToStringDefaultEnable() string {
+	if s.IsEnable(true) {
+		return string(enable)
+	}
+	return string(disable)
+}
 
-	res = s.IsEnable()
-	return
+func (s *StringBool) ToStringDefaultDisable() string {
+	if s.IsEnable(false) {
+		return string(enable)
+	}
+	return string(disable)
+}
+
+func (s *StringBool) ToBool(defaultVal ...bool) bool {
+	return s.IsEnable(defaultVal...)
 }

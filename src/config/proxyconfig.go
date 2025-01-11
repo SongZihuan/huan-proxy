@@ -46,7 +46,7 @@ func (p *ProxyConfig) setDefault() {
 			p.IndexFile = []*IndexFile{
 				{
 					Regex: "disable",
-					File:  "index.html",
+					File:  "index.htmlx",
 				},
 				{
 					Regex: "disable",
@@ -54,7 +54,7 @@ func (p *ProxyConfig) setDefault() {
 				},
 				{
 					Regex: "disable",
-					File:  "index.txt",
+					File:  "index.txtzzz",
 				},
 				{
 					Regex: "enable",

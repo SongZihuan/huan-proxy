@@ -84,22 +84,22 @@ func (s *HTTPServer) _getIndexFile(ruleIndex int, dir string, deep int) string {
 		return ""
 	}
 
-	var indexDirNum = 0
+	var indexDirNum = -1
 	var indexDir os.DirEntry = nil
 
-	var indexFileNum = 0
+	var indexFileNum = -1
 	var indexFile os.DirEntry = nil
 
 	_, err = s.cfg.IndexFile.ForEach(ruleIndex, func(file *config.IndexFileCompile) (any, error) {
 		for _, i := range lst {
 			if file.CheckDirEntry(i) {
 				if i.IsDir() {
-					if file.Index > indexDirNum {
+					if indexDirNum == -1 || file.Index < indexDirNum {
 						indexDirNum = file.Index
 						indexDir = i
 					}
 				} else {
-					if file.Index > indexFileNum {
+					if indexFileNum == -1 || file.Index < indexFileNum {
 						indexFileNum = file.Index
 						indexFile = i
 					}
