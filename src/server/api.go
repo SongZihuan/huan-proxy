@@ -28,11 +28,11 @@ func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 	r.URL.Host = targetURL.Host
 
 	path := r.URL.Path
-	if !strings.HasPrefix(path, rule.SubPrefixPath) {
-		s.abortServerError(w)
-		return
+
+	if strings.HasPrefix(path, rule.SubPrefixPath) {
+		path = path[len(rule.SubPrefixPath):]
 	}
-	path = path[len(rule.SubPrefixPath):]
+
 	path = rule.AddPrefixPath + path
 	r.URL.Path = path
 
@@ -81,7 +81,6 @@ func (s *HTTPServer) processProxyHeader(r *http.Request) {
 	r.Header.Set("X-Forwarded-For", strings.Join(ProxyList, ","))
 	r.Header.Set("X-Forwarded-Host", host)
 	r.Header.Set("X-Forwarded-Proto", proto)
-
 }
 
 func (s *HTTPServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {

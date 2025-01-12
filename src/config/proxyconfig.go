@@ -33,10 +33,9 @@ type ProxyDirConfig struct {
 }
 
 type ProxyAPIConfig struct {
-	Address       string           `yaml:"address"`
-	AddPrefixPath string           `yaml:"addprefixpath"`
-	SubPrefixPath string           `yaml:"subprefixpath"`
-	EnableSSL     utils.StringBool `yaml:"enablessl"`
+	Address       string `yaml:"address"`
+	AddPrefixPath string `yaml:"addprefixpath"`
+	SubPrefixPath string `yaml:"subprefixpath"`
 }
 
 func (p *ProxyConfig) setDefault() {
@@ -88,7 +87,7 @@ func (p *ProxyConfig) check() ConfigError {
 			return NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
 		}
 
-		if strings.HasPrefix(p.BasePath, p.SubPrefixPath) {
+		if !strings.HasPrefix(p.BasePath, p.SubPrefixPath) {
 			return NewConfigError("sub prefix path error")
 		}
 
