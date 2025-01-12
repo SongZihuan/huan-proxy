@@ -14,7 +14,7 @@ func (r *ProxyRuleConfig) setDefault() {
 	}
 }
 
-func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ixfile *IndexFileCompileList, igfile *IgnoreFileCompileList) ConfigError {
+func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ixfile *IndexFileCompileList, igfile *IgnoreFileCompileList, re *RewriteConfigCompileList) ConfigError {
 	if len(r.Rules) == 0 {
 		return NewConfigError("proxy rule is empty")
 	}
@@ -43,6 +43,13 @@ func (r *ProxyRuleConfig) check(ps *ProxyServerConfig, ixfile *IndexFileCompileL
 			err := ps.Add(ruleIndex, rule)
 			if err != nil {
 				return NewConfigError(fmt.Sprintf("proxy server can not create: %s", err.Error()))
+			}
+
+			if rule.RewriteReg != "" {
+				err = re.Add(ruleIndex, rule.RewriteReg, rule.RewriteTarget)
+				if err != nil {
+					return NewConfigError(fmt.Sprintf("rewrite %s error", err.Error()))
+				}
 			}
 		}
 	}

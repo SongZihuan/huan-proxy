@@ -15,6 +15,18 @@ type IgnoreFile struct {
 	File  string           `yaml:"file"`
 }
 
+func (i *IgnoreFile) setDefault() {
+	i.Regex.SetDefaultDisable()
+}
+
+func (i *IgnoreFile) check() ConfigError {
+	if i.File == "" {
+		return NewConfigError("file is empty")
+	}
+
+	return nil
+}
+
 type IgnoreFileCompile struct {
 	Index      int
 	IsRegex    bool
@@ -34,7 +46,7 @@ func (i *IgnoreFileCompile) CheckName(name string) bool {
 	}
 }
 
-func NewIgnoreFileCompile(ignore int, i *IgnoreFile) (*IgnoreFileCompile, error) {
+func NewIgnoreFileCompile(index int, i *IgnoreFile) (*IgnoreFileCompile, error) {
 	if i.Regex.IsEnable() {
 		reg, err := regexp.Compile(i.File)
 		if err != nil {
@@ -42,14 +54,14 @@ func NewIgnoreFileCompile(ignore int, i *IgnoreFile) (*IgnoreFileCompile, error)
 		}
 
 		return &IgnoreFileCompile{
-			Index:      ignore,
+			Index:      index,
 			IsRegex:    true,
 			StringFile: "",
 			RegexFile:  reg,
 		}, nil
 	} else {
 		return &IgnoreFileCompile{
-			Index:      ignore,
+			Index:      index,
 			IsRegex:    false,
 			StringFile: i.File,
 			RegexFile:  nil,
@@ -66,27 +78,27 @@ func (i *IgnoreFileCompileList) init() error {
 	return nil
 }
 
-func (i *IgnoreFileCompileList) Add(ruleIgnore int, fileIgnore int, ifile *IgnoreFile) error {
+func (i *IgnoreFileCompileList) Add(ruleIndex int, fileIgnore int, ifile *IgnoreFile) error {
 	ignoreFile, err := NewIgnoreFileCompile(fileIgnore, ifile)
 	if err != nil {
 		return err
 	}
 
-	lst := i.Map[ruleIgnore]
-	if lst == nil {
+	lst, ok := i.Map[ruleIndex]
+	if !ok || lst == nil {
 		lst = make([]*IgnoreFileCompile, 0, DefaultIgnoreFileListSize)
 	}
 
 	lst = append(lst, ignoreFile)
-	i.Map[ruleIgnore] = lst
+	i.Map[ruleIndex] = lst
 	return nil
 }
 
 type IgnoreForEachFunc func(ignoreFile *IgnoreFileCompile) (any, error)
 
 func (i *IgnoreFileCompileList) ForEach(ruleIgnore int, fn IgnoreForEachFunc) (any, error) {
-	lst := i.Map[ruleIgnore]
-	if lst == nil {
+	lst, ok := i.Map[ruleIgnore]
+	if !ok || lst == nil {
 		return nil, fmt.Errorf("rule not found")
 	}
 

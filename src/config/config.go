@@ -12,6 +12,7 @@ type ConfigStruct struct {
 	ProxyServer ProxyServerConfig
 	IndexFile   IndexFileCompileList
 	IgnoreFile  IgnoreFileCompileList
+	Rewrite     RewriteConfigCompileList
 }
 
 func (c *ConfigStruct) init() error {
@@ -48,6 +49,11 @@ func (c *ConfigStruct) init() error {
 	if err != nil {
 		return err
 	}
+
+	err = c.Rewrite.init()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -70,7 +76,7 @@ func (c *ConfigStruct) setDefault() {
 }
 
 func (c *ConfigStruct) check() (err ConfigError) {
-	err = c.Yaml.check(&c.CoreOrigin, &c.ProxyServer, &c.IndexFile, &c.IgnoreFile)
+	err = c.Yaml.check(&c.CoreOrigin, &c.ProxyServer, &c.IndexFile, &c.IgnoreFile, &c.Rewrite)
 	if err != nil && err.IsError() {
 		return err
 	}
@@ -96,6 +102,7 @@ func (c *ConfigStruct) ready() (err ConfigError) {
 	}
 
 	c.setDefault()
+
 	err = c.check()
 	if err != nil && err.IsError() {
 		return err

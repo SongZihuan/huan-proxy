@@ -15,6 +15,18 @@ type IndexFile struct {
 	File  string           `yaml:"file"`
 }
 
+func (i *IndexFile) setDefault() {
+	i.Regex.SetDefaultDisable()
+}
+
+func (i *IndexFile) check() ConfigError {
+	if i.File == "" {
+		return NewConfigError("file is empty")
+	}
+
+	return nil
+}
+
 type IndexFileCompile struct {
 	Index      int
 	IsRegex    bool
@@ -72,8 +84,8 @@ func (i *IndexFileCompileList) Add(ruleIndex int, fileIndex int, ifile *IndexFil
 		return err
 	}
 
-	lst := i.Map[ruleIndex]
-	if lst == nil {
+	lst, ok := i.Map[ruleIndex]
+	if !ok || lst == nil {
 		lst = make([]*IndexFileCompile, 0, DefaultIndexFileListSize)
 	}
 
@@ -85,8 +97,8 @@ func (i *IndexFileCompileList) Add(ruleIndex int, fileIndex int, ifile *IndexFil
 type IndexForEachFunc func(indexFile *IndexFileCompile) (any, error)
 
 func (i *IndexFileCompileList) ForEach(ruleIndex int, fn IndexForEachFunc) (any, error) {
-	lst := i.Map[ruleIndex]
-	if lst == nil {
+	lst, ok := i.Map[ruleIndex]
+	if !ok || lst == nil {
 		return nil, fmt.Errorf("rule not found")
 	}
 

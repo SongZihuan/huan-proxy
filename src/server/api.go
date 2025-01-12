@@ -34,6 +34,15 @@ func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 	}
 
 	path = rule.AddPrefixPath + path
+
+	if rule.RewriteReg != "" {
+		path, err = s.cfg.Rewrite.Rewrite(ruleIndex, path)
+		if err != nil {
+			s.abortServerError(w)
+			return
+		}
+	}
+
 	r.URL.Path = path
 
 	proxy.ServeHTTP(w, r) // 反向代理

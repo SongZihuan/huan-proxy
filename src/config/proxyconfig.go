@@ -36,12 +36,14 @@ type ProxyAPIConfig struct {
 	Address       string `yaml:"address"`
 	AddPrefixPath string `yaml:"addprefixpath"`
 	SubPrefixPath string `yaml:"subprefixpath"`
+	RewriteReg    string `yaml:"rewritereg"`
+	RewriteTarget string `yaml:"rewritetarget"`
 }
 
 func (p *ProxyConfig) setDefault() {
 	p.BasePath = utils.ProcessPath(p.BasePath)
 
-	if p.Type == ProxyTypeAPI {
+	if p.Type == ProxyTypeDir {
 		if len(p.IndexFile) == 0 {
 			p.IndexFile = []*IndexFile{
 				{
@@ -62,6 +64,14 @@ func (p *ProxyConfig) setDefault() {
 				},
 			}
 		}
+
+		for _, i := range p.IndexFile {
+			i.setDefault()
+		}
+
+		for _, i := range p.IgnoreFile {
+			i.setDefault()
+		}
 	} else if p.Type == ProxyTypeAPI {
 		p.AddPrefixPath = utils.ProcessPath(p.AddPrefixPath)
 		p.SubPrefixPath = utils.ProcessPath(p.SubPrefixPath)
@@ -78,8 +88,18 @@ func (p *ProxyConfig) check() ConfigError {
 			return NewConfigError(fmt.Sprintf("dir path %s not exist", p.Dir))
 		}
 
-		if len(p.IndexFile) == 0 {
-			return NewConfigError("index file is empty")
+		for _, i := range p.IndexFile {
+			err := i.check()
+			if err != nil && err.IsError() {
+				return err
+			}
+		}
+
+		for _, i := range p.IgnoreFile {
+			err := i.check()
+			if err != nil && err.IsError() {
+				return err
+			}
 		}
 	} else if p.Type == ProxyTypeAPI {
 		_, err := url.Parse(p.Address)
@@ -91,6 +111,9 @@ func (p *ProxyConfig) check() ConfigError {
 			return NewConfigError("sub prefix path error")
 		}
 
+		if len(p.RewriteTarget) != 0 && len(p.RewriteReg) == 0 {
+			return NewConfigError("rewrite reg is empty")
+		}
 	} else {
 		return NewConfigError("proxy type must be file or dir or api")
 	}

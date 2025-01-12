@@ -22,7 +22,7 @@ func (y *YamlConfig) setDefault() {
 	y.Rules.setDefault()
 }
 
-func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig, ifile *IndexFileCompileList, igfile *IgnoreFileCompileList) (err ConfigError) {
+func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig, ifile *IndexFileCompileList, igfile *IgnoreFileCompileList, re *RewriteConfigCompileList) (err ConfigError) {
 	err = y.GlobalConfig.check()
 	if err != nil && err.IsError() {
 		return err
@@ -33,7 +33,7 @@ func (y *YamlConfig) check(co *CorsOrigin, ps *ProxyServerConfig, ifile *IndexFi
 		return err
 	}
 
-	err = y.Rules.check(ps, ifile, igfile)
+	err = y.Rules.check(ps, ifile, igfile, re)
 	if err != nil && err.IsError() {
 		return err
 	}
