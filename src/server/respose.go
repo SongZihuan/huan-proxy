@@ -65,3 +65,7 @@ func (s *HTTPServer) abortServerError(w http.ResponseWriter) {
 func (s *HTTPServer) abortNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (s *HTTPServer) statusOK(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusOK)
+}

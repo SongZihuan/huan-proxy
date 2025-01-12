@@ -14,8 +14,11 @@ import (
 var ServerStop = fmt.Errorf("server stop")
 
 type HTTPServer struct {
-	address string
-	cfg     *config.ConfigStruct
+	address   string
+	cfg       *config.ConfigStruct
+	formatter func(param LogFormatterParams) string
+	skip      map[string]struct{}
+	isTerm    bool
 }
 
 func NewServer() *HTTPServer {
@@ -23,9 +26,14 @@ func NewServer() *HTTPServer {
 		panic("not ready")
 	}
 
+	var formatter = defaultLogFormatter
+	var skip = make(map[string]struct{}, 10)
+
 	return &HTTPServer{
-		address: config.Config().Yaml.Http.Address,
-		cfg:     config.Config(),
+		address:   config.Config().Yaml.Http.Address,
+		cfg:       config.Config(),
+		formatter: formatter,
+		skip:      skip,
 	}
 }
 
@@ -46,6 +54,10 @@ func (s *HTTPServer) run() error {
 }
 
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.LoggerServerHTTP(w, r, s.NormalServeHTTP)
+}
+
+func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.writeHuanProxyHeader(r)
 	if !s.checkProxyTrust(w, r) {
 		return

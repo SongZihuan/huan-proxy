@@ -11,34 +11,35 @@ import (
 	"strings"
 )
 
-const MinWaitSec = 0
-const MaxWaitSec = 60
 const OptionIdent = "  "
 const OptionPrefix = "--"
-const UseagePrefixWidth = 10
+const UsagePrefixWidth = 10
 
 type flagData struct {
 	flagReady  bool
 	flagSet    bool
 	flagParser bool
 
-	HelpData         bool
-	HelpName         string
-	HelpUseage       string
-	VersionData      bool
-	VersionName      string
-	VersionUseage    string
-	LicenseData      bool
-	LicenseName      string
-	LicenseUseage    string
-	ReportData       bool
-	ReportName       string
-	ReportUseage     string
-	ConfigFileData   string
-	ConfigFileName   string
-	ConfigFileUseage string
+	HelpData        bool
+	HelpName        string
+	HelpUsage       string
+	VersionData     bool
+	VersionName     string
+	VersionUsage    string
+	LicenseData     bool
+	LicenseName     string
+	LicenseUsage    string
+	ReportData      bool
+	ReportName      string
+	ReportUsage     string
+	ConfigFileData  string
+	ConfigFileName  string
+	ConfigFileUsage string
+	TermData        bool
+	TermName        string
+	TermUsage       string
 
-	Useage string
+	Usage string
 }
 
 func initData() {
@@ -47,29 +48,32 @@ func initData() {
 		flagSet:    false,
 		flagParser: false,
 
-		HelpData:         false,
-		HelpName:         "help",
-		HelpUseage:       fmt.Sprintf("Show usage of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		VersionData:      false,
-		VersionName:      "version",
-		VersionUseage:    fmt.Sprintf("Show version of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		LicenseData:      false,
-		LicenseName:      "license",
-		LicenseUseage:    fmt.Sprintf("Show license of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		ReportData:       false,
-		ReportName:       "report",
-		ReportUseage:     fmt.Sprintf("Show how to report questions/errors of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		ConfigFileData:   "config.yaml",
-		ConfigFileName:   "config",
-		ConfigFileUseage: fmt.Sprintf("%s", "The location of the running configuration file of the backend service. The option is a string, the default value is config.yaml in the running directory."),
-		Useage:           "",
+		HelpData:        false,
+		HelpName:        "help",
+		HelpUsage:       fmt.Sprintf("Show usage of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		VersionData:     false,
+		VersionName:     "version",
+		VersionUsage:    fmt.Sprintf("Show version of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		LicenseData:     false,
+		LicenseName:     "license",
+		LicenseUsage:    fmt.Sprintf("Show license of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		ReportData:      false,
+		ReportName:      "report",
+		ReportUsage:     fmt.Sprintf("Show how to report questions/errors of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		ConfigFileData:  "config.yaml",
+		ConfigFileName:  "config",
+		ConfigFileUsage: fmt.Sprintf("%s", "The location of the running configuration file of the backend service. The option is a string, the default value is config.yaml in the running directory."),
+		TermData:        false,
+		TermName:        "term",
+		TermUsage:       "Terminal output mode. If you have this program running in the foreground terminal (standard output is the terminal), you can turn this option on to get formatted logs.",
+		Usage:           "",
 	}
 
 	data.ready()
 }
 
-func (d *flagData) writeUseAge() {
-	if len(d.Useage) != 0 {
+func (d *flagData) writeUsage() {
+	if len(d.Usage) != 0 {
 		return
 	}
 
@@ -97,9 +101,10 @@ func (d *flagData) writeUseAge() {
 			panic("can not get option name")
 		}
 
-		optionUseage := val.FieldByName(option + "Useage").Interface().(string)
+		fmt.Printf("OPTION: %s\n", option+"Usage")
+		optionUsage, ok := val.FieldByName(option + "Usage").Interface().(string)
 		if !ok {
-			panic("can not get option useage")
+			panic("can not get option Usage")
 		}
 
 		var title string
@@ -141,12 +146,12 @@ func (d *flagData) writeUseAge() {
 		result.WriteString(title)
 		result.WriteString("\n")
 
-		usegae := utils.FormatTextToWidthAndPrefix(optionUseage, UseagePrefixWidth, utils.NormalConsoleWidth)
+		usegae := utils.FormatTextToWidthAndPrefix(optionUsage, UsagePrefixWidth, utils.NormalConsoleWidth)
 		result.WriteString(usegae)
 		result.WriteString("\n\n")
 	}
 
-	d.Useage = strings.TrimRight(result.String(), "\n")
+	d.Usage = strings.TrimRight(result.String(), "\n")
 }
 
 func (d *flagData) setFlag() {
@@ -154,23 +159,26 @@ func (d *flagData) setFlag() {
 		return
 	}
 
-	flag.BoolVar(&d.HelpData, data.HelpName, data.HelpData, data.HelpUseage)
-	flag.BoolVar(&d.HelpData, data.HelpName[0:1], data.HelpData, data.HelpUseage)
+	flag.BoolVar(&d.HelpData, data.HelpName, data.HelpData, data.HelpUsage)
+	flag.BoolVar(&d.HelpData, data.HelpName[0:1], data.HelpData, data.HelpUsage)
 
-	flag.BoolVar(&d.VersionData, data.VersionName, data.VersionData, data.VersionUseage)
-	flag.BoolVar(&d.VersionData, data.VersionName[0:1], data.VersionData, data.VersionUseage)
+	flag.BoolVar(&d.VersionData, data.VersionName, data.VersionData, data.VersionUsage)
+	flag.BoolVar(&d.VersionData, data.VersionName[0:1], data.VersionData, data.VersionUsage)
 
-	flag.BoolVar(&d.LicenseData, data.LicenseName, data.LicenseData, data.LicenseUseage)
-	flag.BoolVar(&d.LicenseData, data.LicenseName[0:1], data.LicenseData, data.LicenseUseage)
+	flag.BoolVar(&d.LicenseData, data.LicenseName, data.LicenseData, data.LicenseUsage)
+	flag.BoolVar(&d.LicenseData, data.LicenseName[0:1], data.LicenseData, data.LicenseUsage)
 
-	flag.BoolVar(&d.ReportData, data.ReportName, data.ReportData, data.ReportUseage)
-	flag.BoolVar(&d.ReportData, data.ReportName[0:1], data.ReportData, data.ReportUseage)
+	flag.BoolVar(&d.ReportData, data.ReportName, data.ReportData, data.ReportUsage)
+	flag.BoolVar(&d.ReportData, data.ReportName[0:1], data.ReportData, data.ReportUsage)
 
-	flag.StringVar(&d.ConfigFileData, data.ConfigFileName, data.ConfigFileData, data.ConfigFileUseage)
-	flag.StringVar(&d.ConfigFileData, data.ConfigFileName[0:1], data.ConfigFileData, data.ConfigFileUseage)
+	flag.StringVar(&d.ConfigFileData, data.ConfigFileName, data.ConfigFileData, data.ConfigFileUsage)
+	flag.StringVar(&d.ConfigFileData, data.ConfigFileName[0:1], data.ConfigFileData, data.ConfigFileUsage)
+
+	flag.BoolVar(&d.TermData, data.TermName, data.TermData, data.TermUsage)
+	flag.BoolVar(&d.TermData, data.TermName[0:1], data.TermData, data.TermUsage)
 
 	flag.Usage = func() {
-		_, _ = d.PrintUseage()
+		_, _ = d.PrintUsage()
 	}
 	d.flagSet = true
 }
@@ -193,7 +201,7 @@ func (d *flagData) ready() {
 		return
 	}
 
-	d.writeUseAge()
+	d.writeUsage()
 	d.setFlag()
 	d.parser()
 	d.flagReady = true
@@ -219,12 +227,12 @@ func (d *flagData) Help() bool {
 	return d.HelpData
 }
 
-func (d *flagData) FprintUseage(writer io.Writer) (int, error) {
-	return fmt.Fprintf(writer, "%s\n", d.Useage)
+func (d *flagData) FprintUsage(writer io.Writer) (int, error) {
+	return fmt.Fprintf(writer, "%s\n", d.Usage)
 }
 
-func (d *flagData) PrintUseage() (int, error) {
-	return d.FprintUseage(flag.CommandLine.Output())
+func (d *flagData) PrintUsage() (int, error) {
+	return d.FprintUsage(flag.CommandLine.Output())
 }
 
 func (d *flagData) Version() bool {
@@ -294,6 +302,14 @@ func (d *flagData) ConfigFile() string {
 	}
 
 	return d.ConfigFileData
+}
+
+func (d *flagData) Term() bool {
+	if !d.isReady() {
+		panic("flag not ready")
+	}
+
+	return d.TermData
 }
 
 func (d *flagData) SetOutput(writer io.Writer) {

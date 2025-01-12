@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/gabriel-vasile/mimetype"
@@ -42,10 +41,8 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 	}
 
 	if !utils.IsFile(filePath) {
-		fmt.Printf("A filePath: %s, %d\n", filePath, len(filePath))
 		filePath = s.getIndexFile(ruleIndex, filePath)
-		fmt.Printf("B filePath: %s, %d\n", filePath, len(filePath))
-		//fileBase = filePath[len(rule.BasePath+"/"):len(filePath)]
+		fileBase = filePath[len(rule.BasePath+"/"):len(filePath)]
 	} else if fileBase != "" {
 		ignore, err := s.cfg.IgnoreFile.ForEach(ruleIndex, func(file *config.IgnoreFileCompile) (any, error) {
 			if file.CheckName(fileBase) {
@@ -58,6 +55,7 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 			return
 		} else if ig, ok := ignore.(bool); ok && ig {
 			filePath = s.getIndexFile(ruleIndex, filePath)
+			fileBase = filePath[len(rule.BasePath+"/"):len(filePath)]
 		}
 	}
 
@@ -87,6 +85,7 @@ func (s *HTTPServer) dirServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 		return
 	}
 	w.Header().Set("Content-Type", mimeType.String())
+	s.statusOK(w)
 }
 
 func (s *HTTPServer) getIndexFile(ruleIndex int, dir string) string {

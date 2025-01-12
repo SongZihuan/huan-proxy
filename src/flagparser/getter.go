@@ -12,12 +12,12 @@ func Help() bool {
 	return data.Help()
 }
 
-func FprintUseage(writer io.Writer) (int, error) {
-	return data.FprintUseage(writer)
+func FprintUsage(writer io.Writer) (int, error) {
+	return data.FprintUsage(writer)
 }
 
-func PrintUseage() (int, error) {
-	return data.PrintUseage()
+func PrintUsage() (int, error) {
+	return data.PrintUsage()
 }
 
 func FprintVersion(writer io.Writer) (int, error) {
@@ -96,6 +96,10 @@ func NotRunModeOption() string {
 
 func ConfigFile() string {
 	return data.ConfigFile()
+}
+
+func Term() bool {
+	return data.Term()
 }
 
 func SetOutput(writer io.Writer) {

@@ -33,4 +33,5 @@ func (s *HTTPServer) fileServer(rule *config.ProxyConfig, w http.ResponseWriter,
 		return
 	}
 	w.Header().Set("Content-Type", mimeType.String())
+	s.statusOK(w)
 }

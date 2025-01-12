@@ -39,7 +39,7 @@ func InitFlag() (err error) {
 
 	if License() {
 		if hasPrint {
-			PrintLF()
+			_, _ = PrintLF()
 		}
 		_, _ = PrintLicense()
 		hasPrint = true
@@ -47,16 +47,16 @@ func InitFlag() (err error) {
 
 	if Report() {
 		if hasPrint {
-			PrintLF()
+			_, _ = PrintLF()
 		}
 		_, _ = PrintReport()
 	}
 
 	if Help() {
 		if hasPrint {
-			PrintLF()
+			_, _ = PrintLF()
 		}
-		_, _ = PrintUseage()
+		_, _ = PrintUsage()
 		hasPrint = true
 	}
 
