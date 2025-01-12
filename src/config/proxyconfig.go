@@ -107,7 +107,7 @@ func (p *ProxyConfig) check() ConfigError {
 			return NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
 		}
 
-		if !strings.HasPrefix(p.BasePath, p.SubPrefixPath) {
+		if p.BasePath != p.SubPrefixPath && !strings.HasPrefix(p.BasePath, p.SubPrefixPath+"/") {
 			return NewConfigError("sub prefix path error")
 		}
 

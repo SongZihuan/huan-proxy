@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
+	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"net/http"
 	"net/url"
@@ -22,10 +23,10 @@ func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 		return
 	}
 
-	s.processProxyHeader(r)
-
 	r.URL.Scheme = targetURL.Scheme
 	r.URL.Host = targetURL.Host
+
+	s.processProxyHeader(r)
 
 	path := r.URL.Path
 
@@ -72,11 +73,16 @@ func (s *HTTPServer) processProxyHeader(r *http.Request) {
 		proto = r.Header.Get("X-Forwarded-Proto")
 
 		if host == "" {
-			host = r.URL.Host
+			host = r.Host
 		}
 
+		host, _ = utils.SplitHostPort(host) // 去除host中的端口号
+
 		if proto == "" {
-			proto = r.URL.Scheme
+			proto = "http"
+			if r.TLS != nil {
+				proto = "https"
+			}
 		}
 
 		ProxyList = append(make([]string, 0, 1), remoteIP.String())
@@ -86,8 +92,8 @@ func (s *HTTPServer) processProxyHeader(r *http.Request) {
 			fmt.Sprintf("proto=%s", proto))
 	}
 
-	r.Header.Set("Forwarded", strings.Join(ForwardedList, ","))
-	r.Header.Set("X-Forwarded-For", strings.Join(ProxyList, ","))
+	r.Header.Set("Forwarded", strings.Join(ForwardedList, ", "))
+	r.Header.Set("X-Forwarded-For", strings.Join(ProxyList, ", "))
 	r.Header.Set("X-Forwarded-Host", host)
 	r.Header.Set("X-Forwarded-Proto", proto)
 }
@@ -97,8 +103,11 @@ func (s *HTTPServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]
 	ProxyList := make([]string, 0, len(ForwardedList)+1)
 	NewForwardedList := make([]string, 0, len(ForwardedList)+1)
 
-	host := r.URL.Host
-	proto := r.URL.Scheme
+	host, _ := utils.SplitHostPort(r.Host) // 去除host中的端口号
+	proto := "http"
+	if r.TLS != nil {
+		proto = "https"
+	}
 
 	for _, keyStr := range ForwardedList {
 		kv := strings.Split(strings.ReplaceAll(keyStr, " ", ""), "=")
@@ -149,11 +158,16 @@ func (s *HTTPServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *http.Requ
 	proto := r.Header.Get("X-Forwarded-Proto")
 
 	if host == "" {
-		host = r.URL.Host
+		host = r.Host
 	}
 
+	host, _ = utils.SplitHostPort(host) // 去除host中的端口号
+
 	if proto == "" {
-		proto = r.URL.Scheme
+		proto = "http"
+		if r.TLS != nil {
+			proto = "https"
+		}
 	}
 
 	ProxyList = append(ProxyList, remoteIP.String())
