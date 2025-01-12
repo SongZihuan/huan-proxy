@@ -139,3 +139,15 @@ func StringToOnlyPrint(str string) string {
 
 	return string(res)
 }
+
+func IsGoodQueryKey(key string) bool {
+	pattern := `^[a-zA-Z0-9\-._~]+$`
+	matched, _ := regexp.MatchString(pattern, key)
+	return matched
+}
+
+func IsValidHTTPHeaderKey(key string) bool {
+	pattern := `^[a-zA-Z0-9!#$%&'*+.^_` + "`" + `|~-]+$`
+	matched, _ := regexp.MatchString(pattern, key)
+	return matched
+}

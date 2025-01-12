@@ -13,6 +13,9 @@ const (
 	ProxyTypeAPI  = "api"
 )
 
+const XHuanProxyHeaer = "X-Huan-Proxy"
+const ViaHeader = "Via"
+
 type ProxyConfig struct {
 	Type     string `yaml:"type"`
 	BasePath string `yaml:"basepath"`
@@ -32,13 +35,48 @@ type ProxyDirConfig struct {
 	IgnoreFile []*IgnoreFile `yaml:"ignorefile"`
 }
 
-type ProxyAPIConfig struct {
-	Address       string `yaml:"address"`
-	AddPrefixPath string `yaml:"addprefixpath"`
-	SubPrefixPath string `yaml:"subprefixpath"`
-	RewriteReg    string `yaml:"rewritereg"`
-	RewriteTarget string `yaml:"rewritetarget"`
+type HeaderConfig struct {
+	Header string `yaml:"header"`
+	Value  string `yaml:"value"`
 }
+
+type QueryConfig struct {
+	Query string `yaml:"query"`
+	Value string `yaml:"value"`
+}
+
+var WarningHeader = []string{
+	"Host",
+	"Referer",
+	"User-Agent",
+	"Forwarded",
+	"Content-Length",
+	"Transfer-Encoding",
+	"Upgrade",
+	"Connection",
+	"X-Forwarded-For",
+	"X-Forwarded-Host",
+	"X-Forwarded-Proto",
+	"X-Real-Ip",
+	"X-Real-Port",
+}
+
+type ProxyAPIConfig struct {
+	Address       string         `yaml:"address"`
+	AddPrefixPath string         `yaml:"addprefixpath"`
+	SubPrefixPath string         `yaml:"subprefixpath"`
+	RewriteReg    string         `yaml:"rewritereg"`
+	RewriteTarget string         `yaml:"rewritetarget"`
+	Header        []HeaderConfig `yaml:"header"`
+	HeaderAdd     []HeaderConfig `yaml:"headeradd"`
+	HeaderDel     []string       `yaml:"headerdel"`
+	Query         []QueryConfig  `yaml:"query"`
+	QueryAdd      []QueryConfig  `yaml:"queryadd"`
+	QueryDel      []string       `yaml:"querydel"`
+	Via           string         `yaml:"via"`
+}
+
+const defaultVia = "huan-proxy"
 
 func (p *ProxyConfig) setDefault() {
 	p.BasePath = utils.ProcessPath(p.BasePath)
@@ -75,6 +113,10 @@ func (p *ProxyConfig) setDefault() {
 	} else if p.Type == ProxyTypeAPI {
 		p.AddPrefixPath = utils.ProcessPath(p.AddPrefixPath)
 		p.SubPrefixPath = utils.ProcessPath(p.SubPrefixPath)
+
+		if p.Via == "" {
+			p.Via = defaultVia
+		}
 	}
 }
 
@@ -114,8 +156,119 @@ func (p *ProxyConfig) check() ConfigError {
 		if len(p.RewriteTarget) != 0 && len(p.RewriteReg) == 0 {
 			return NewConfigError("rewrite reg is empty")
 		}
+
+		for _, h := range p.Header {
+			if h.Header == "" {
+				return NewConfigError("header name is empty")
+			}
+
+			if h.Header == ViaHeader || h.Header == XHuanProxyHeaer {
+				return NewConfigError(fmt.Sprintf("header %s use by http system", h.Header))
+			}
+
+			if !utils.IsValidHTTPHeaderKey(h.Header) {
+				return NewConfigError(fmt.Sprintf("header %s is not valid", h.Header))
+			}
+
+			if isNotGoodHeader(h.Header) {
+				_ = NewConfigWarning(fmt.Sprintf("header %s use by http system", h.Header))
+			}
+
+			if h.Value == "" {
+				_ = NewConfigWarning(fmt.Sprintf("the value of header %s is empty, but maybe it is not delete from requests", h.Header))
+			}
+		}
+
+		for _, h := range p.HeaderAdd {
+			if h.Header == "" {
+				return NewConfigError("header name is empty")
+			}
+
+			if h.Header == ViaHeader || h.Header == XHuanProxyHeaer {
+				return NewConfigError(fmt.Sprintf("header %s use by http system", h.Header))
+			}
+
+			if !utils.IsValidHTTPHeaderKey(h.Header) {
+				return NewConfigError(fmt.Sprintf("header %s is not valid", h.Header))
+			}
+
+			if isNotGoodHeader(h.Header) {
+				_ = NewConfigWarning(fmt.Sprintf("header %s use by http system", h.Header))
+			}
+
+			if h.Value == "" {
+				_ = NewConfigWarning(fmt.Sprintf("the value of header %s is empty, but maybe it is not delete from requests", h.Header))
+			}
+		}
+
+		for _, h := range p.HeaderDel {
+			if h == "" {
+				return NewConfigError("header name is empty")
+			}
+
+			if h == ViaHeader || h == XHuanProxyHeaer {
+				return NewConfigError(fmt.Sprintf("header %s use by http system", h))
+			}
+
+			if !utils.IsValidHTTPHeaderKey(h) {
+				return NewConfigError(fmt.Sprintf("header %s is not valid", h))
+			}
+
+			if isNotGoodHeader(h) {
+				_ = NewConfigWarning(fmt.Sprintf("header %s use by http system", h))
+			}
+		}
+
+		for _, q := range p.Query {
+			if q.Query == "" {
+				return NewConfigError("query key is empty")
+			}
+
+			if !utils.IsGoodQueryKey(q.Query) {
+				_ = NewConfigWarning(fmt.Sprintf("query %s is not good", q.Query))
+			}
+
+			if q.Value == "" {
+				_ = NewConfigWarning(fmt.Sprintf("the value of query %s is empty, but maybe it is not delete from requests", q.Query))
+			}
+		}
+
+		for _, q := range p.QueryAdd {
+			if q.Query == "" {
+				return NewConfigError("query key is empty")
+			}
+
+			if !utils.IsGoodQueryKey(q.Query) {
+				_ = NewConfigWarning(fmt.Sprintf("query %s is not good", q.Query))
+			}
+
+			if q.Value == "" {
+				_ = NewConfigWarning(fmt.Sprintf("the value of query %s is empty, but maybe it is not delete from requests", q.Query))
+			}
+		}
+
+		for _, q := range p.QueryDel {
+			if q == "" {
+				return NewConfigError("query key is empty")
+			}
+
+			if !utils.IsGoodQueryKey(q) {
+				_ = NewConfigWarning(fmt.Sprintf("query %s is not good", q))
+			}
+		}
+
 	} else {
 		return NewConfigError("proxy type must be file or dir or api")
 	}
 	return nil
+}
+
+func isNotGoodHeader(header string) bool {
+	for _, h := range WarningHeader {
+		if h == header {
+			return true
+		}
+	}
+
+	return false
 }

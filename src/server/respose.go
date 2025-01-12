@@ -3,14 +3,16 @@ package server
 import (
 	"fmt"
 	resource "github.com/SongZihuan/huan-proxy"
+	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net/http"
 	"strings"
 )
 
-const XHuanProxyHeaer = "X-Huan-Proxy"
+const XHuanProxyHeaer = config.XHuanProxyHeaer
+const ViaHeader = config.ViaHeader
 
-func (s *HTTPServer) writeHuanProxyHeader(w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) writeHuanProxyHeader(r *http.Request) {
 	version := strings.TrimSpace(utils.StringToOnlyPrint(resource.Version))
 	h := r.Header.Get(XHuanProxyHeaer)
 	if h == "" {
@@ -20,7 +22,19 @@ func (s *HTTPServer) writeHuanProxyHeader(w http.ResponseWriter, r *http.Request
 	}
 
 	r.Header.Set(XHuanProxyHeaer, h)
-	w.Header().Set(XHuanProxyHeaer, h)
+}
+
+func (s *HTTPServer) writeViaHeader(rule *config.ProxyConfig, r *http.Request) {
+	info := fmt.Sprintf("%s %s", r.Proto, rule.Via)
+
+	h := r.Header.Get(ViaHeader)
+	if h == "" {
+		h = info
+	} else {
+		h = fmt.Sprintf("%s, %s", h, info)
+	}
+
+	r.Header.Set(ViaHeader, h)
 }
 
 func (s *HTTPServer) abortForbidden(w http.ResponseWriter) {

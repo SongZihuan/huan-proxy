@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
+	"github.com/SongZihuan/huan-proxy/src/logger"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"net/http"
@@ -46,6 +47,36 @@ func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.R
 
 	r.URL.Path = path
 
+	for _, h := range rule.Header {
+		r.Header.Set(h.Header, h.Value)
+	}
+
+	for _, h := range rule.HeaderAdd {
+		r.Header.Add(h.Header, h.Value)
+	}
+
+	for _, h := range rule.HeaderDel {
+		r.Header.Del(h)
+	}
+
+	query := r.URL.Query()
+
+	for _, q := range rule.Query {
+		query.Set(q.Query, q.Value)
+	}
+
+	for _, q := range rule.QueryAdd {
+		query.Add(q.Query, q.Value)
+	}
+
+	for _, q := range rule.QueryDel {
+		logger.Tagf("A '%s'", q)
+		query.Del(q)
+	}
+
+	r.URL.RawQuery = query.Encode()
+
+	s.writeViaHeader(rule, r)
 	proxy.ServeHTTP(w, r) // 反向代理
 }
 
