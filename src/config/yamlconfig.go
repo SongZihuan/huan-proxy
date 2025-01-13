@@ -3,7 +3,6 @@ package config
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/config/rules"
-	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -14,7 +13,7 @@ type YamlConfig struct {
 	rules.RuleListConfig `yaml:",inline"`
 }
 
-func (y *YamlConfig) init() error {
+func (y *YamlConfig) Init() error {
 	return nil
 }
 
@@ -43,8 +42,8 @@ func (y *YamlConfig) Check() (err configerr.ConfigError) {
 	return nil
 }
 
-func (y *YamlConfig) parser() configerr.ParserError {
-	file, err := os.ReadFile(flagparser.ConfigFile())
+func (y *YamlConfig) Parser(filepath string) configerr.ParserError {
+	file, err := os.ReadFile(filepath)
 	if err != nil {
 		return configerr.NewParserError(err, err.Error())
 	}

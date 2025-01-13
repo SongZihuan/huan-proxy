@@ -29,7 +29,7 @@ func MainV1() int {
 		utils.SayGoodByef("%s", "The backend service program is offline/shutdown normally, thank you.")
 	}()
 
-	err = config.InitConfig()
+	err = config.InitConfig(flagparser.ConfigFile())
 	if err != nil {
 		return utils.ExitByError(err)
 	}

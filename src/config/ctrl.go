@@ -5,19 +5,20 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 )
 
-func newConfig() ConfigStruct {
+func newConfig(configPath string) ConfigStruct {
 	return ConfigStruct{
 		configReady:   false,
 		yamlHasParser: false,
+		configPath:    configPath,
 	}
 }
 
-func InitConfig() configerr.ConfigError {
+func InitConfig(configPath string) configerr.ConfigError {
 	if !flagparser.IsReady() {
 		return configerr.NewConfigError("flag not ready")
 	}
 
-	config = newConfig()
+	config = newConfig(configPath)
 	err := config.Init()
 	if err != nil && err.IsError() {
 		return err

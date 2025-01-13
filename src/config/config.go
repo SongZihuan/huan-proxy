@@ -10,13 +10,14 @@ type ConfigStruct struct {
 	configReady   bool
 	yamlHasParser bool
 	sigChan       chan os.Signal
+	configPath    string
 
 	Yaml  YamlConfig
 	Rules *rulescompile.RuleListCompileConfig
 }
 
-func (c *ConfigStruct) Parser() configerr.ParserError {
-	err := c.Yaml.parser()
+func (c *ConfigStruct) Parser(filepath string) configerr.ParserError {
+	err := c.Yaml.Parser(filepath)
 	if err != nil {
 		return err
 	}
@@ -62,7 +63,7 @@ func (c *ConfigStruct) Init() (err configerr.ConfigError) {
 		return configerr.NewConfigError("init error: " + initErr.Error())
 	}
 
-	parserErr := c.Parser()
+	parserErr := c.Parser(c.configPath)
 	if parserErr != nil {
 		return configerr.NewConfigError("parser error: " + parserErr.Error())
 	} else if !c.yamlHasParser {
@@ -103,7 +104,7 @@ func (c *ConfigStruct) Reload() (err configerr.ConfigError) {
 		return configerr.NewConfigError("reload error: " + reloadErr.Error())
 	}
 
-	parserErr := c.Parser()
+	parserErr := c.Parser(c.configPath)
 	if parserErr != nil {
 		return configerr.NewConfigError("reload parser error: " + parserErr.Error())
 	} else if !c.yamlHasParser {
@@ -144,7 +145,7 @@ func (c *ConfigStruct) init() error {
 		return err
 	}
 
-	err = c.Yaml.init()
+	err = c.Yaml.Init()
 	if err != nil {
 		return err
 	}
@@ -158,7 +159,7 @@ func (c *ConfigStruct) reload() error {
 		return err
 	}
 
-	err = c.Yaml.init()
+	err = c.Yaml.Init()
 	if err != nil {
 		return err
 	}
