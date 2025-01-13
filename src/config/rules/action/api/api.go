@@ -11,8 +11,8 @@ import (
 
 type RuleAPIConfig struct {
 	Address       string                `yaml:"address"`
-	AddPrefixPath string                `yaml:"addprefixpath"`
-	SubPrefixPath string                `yaml:"subprefixpath"`
+	AddPrefixPath string                `yaml:"addpath"`
+	SubPrefixPath string                `yaml:"subpath"`
 	Rewrite       rewrite.RewriteConfig `yaml:"rewrite"`
 	HeaderSet     []*HeaderConfig       `yaml:"headerset"`
 	HeaderAdd     []*HeaderConfig       `yaml:"headeradd"`
@@ -59,9 +59,34 @@ func (r *RuleAPIConfig) SetDefault() {
 }
 
 func (r *RuleAPIConfig) Check() configerr.ConfigError {
-	_, err := url.Parse(r.Address)
+	targetURL, err := url.Parse(r.Address)
 	if err != nil {
 		return configerr.NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
+	}
+
+	if targetURL.Opaque != "" {
+		return configerr.NewConfigError("proxy address should not have Opaque")
+	}
+
+	if targetURL.Path == "/" || targetURL.RawPath == "/" {
+		targetURL.Path = ""
+		targetURL.RawPath = ""
+	}
+
+	if targetURL.Path != "" || targetURL.RawPath != "" {
+		return configerr.NewConfigError("proxy address should not have path")
+	}
+
+	if targetURL.RawQuery != "" {
+		return configerr.NewConfigError("proxy address should not have query")
+	}
+
+	if targetURL.User != nil {
+		return configerr.NewConfigError("proxy address should not have user information")
+	}
+
+	if targetURL.Fragment != "" || targetURL.RawFragment != "" {
+		return configerr.NewConfigError("proxy address should not have fragment")
 	}
 
 	cfgErr := r.Rewrite.Check()
