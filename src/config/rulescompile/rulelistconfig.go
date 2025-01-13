@@ -9,7 +9,7 @@ type RuleListCompileConfig struct {
 func NewRuleListConfig(rs *rules.RuleListConfig) (*RuleListCompileConfig, error) {
 	res := make([]*RuleCompileConfig, 0, len(rs.Rules))
 	for _, v := range rs.Rules {
-		r, err := NewRuleCompileConfig(&v)
+		r, err := NewRuleCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}

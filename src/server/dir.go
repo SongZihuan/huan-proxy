@@ -25,9 +25,9 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 		return
 	}
 
-	dirBasePath := rule.Dir.Dir // 根部目录
-	fileAccess := ""            // 访问目录
-	filePath := ""              // 根部目录+访问目录=实际目录
+	dirBasePath := rule.Dir.BasePath // 根部目录
+	fileAccess := ""                 // 访问目录
+	filePath := ""                   // 根部目录+访问目录=实际目录
 
 	url := utils.ProcessPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {

@@ -20,7 +20,9 @@ func (m *MatchConfig) SetDefault() {
 	if m.MatchType == "" {
 		m.MatchType = PrefixMatch
 	}
-	m.MatchPath = utils.ProcessPath(m.MatchPath)
+	if m.MatchType == PrefixMatch || m.MatchType == PrecisionMatch {
+		m.MatchPath = utils.ProcessPath(m.MatchPath)
+	}
 }
 
 func (m *MatchConfig) Check() configerr.ConfigError {

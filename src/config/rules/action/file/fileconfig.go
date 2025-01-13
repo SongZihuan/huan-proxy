@@ -7,24 +7,24 @@ import (
 )
 
 type RuleFileConfig struct {
-	File     string          `yaml:"file"`
-	FileCors cors.CorsConfig `yaml:"cors"` // File前缀避免重名，（yaml键忽略）
+	Path string          `yaml:"path"`
+	Cors cors.CorsConfig `yaml:"cors"`
 }
 
 func (r *RuleFileConfig) SetDefault() {
-	r.FileCors.SetDefault()
+	r.Cors.SetDefault()
 }
 
 func (r *RuleFileConfig) Check() configerr.ConfigError {
-	if r.File == "" {
+	if r.Path == "" {
 		return configerr.NewConfigError("file is empty")
 	}
 
-	if utils.IsFile(r.File) {
+	if !utils.IsFile(r.Path) {
 		return configerr.NewConfigError("file is not exists")
 	}
 
-	err := r.FileCors.Check()
+	err := r.Cors.Check()
 	if err != nil && err.IsError() {
 		return err
 	}

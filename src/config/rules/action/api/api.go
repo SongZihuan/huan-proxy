@@ -10,24 +10,24 @@ import (
 )
 
 type RuleAPIConfig struct {
-	Address          string                `yaml:"address"`
-	ApiAddPrefixPath string                `yaml:"addprefixpath"` // Api前缀避免重名（yaml键忽略）
-	ApiSubPrefixPath string                `yaml:"subprefixpath"` // Api前缀避免重名（yaml键忽略）
-	ApiRewrite       rewrite.RewriteConfig `yaml:"rewrite"`
-	HeaderSet        []HeaderConfig        `yaml:"headerset"`
-	HeaderAdd        []HeaderConfig        `yaml:"headeradd"`
-	HeaderDel        []HeaderDelConfig     `yaml:"headerdel"`
-	QuerySet         []QueryConfig         `yaml:"queryset"`
-	QueryAdd         []QueryConfig         `yaml:"queryadd"`
-	QueryDel         []QueryDelConfig      `yaml:"querydel"`
-	Via              string                `yaml:"via"`
+	Address       string                `yaml:"address"`
+	AddPrefixPath string                `yaml:"addprefixpath"`
+	SubPrefixPath string                `yaml:"subprefixpath"`
+	Rewrite       rewrite.RewriteConfig `yaml:"rewrite"`
+	HeaderSet     []*HeaderConfig       `yaml:"headerset"`
+	HeaderAdd     []*HeaderConfig       `yaml:"headeradd"`
+	HeaderDel     []*HeaderDelConfig    `yaml:"headerdel"`
+	QuerySet      []*QueryConfig        `yaml:"queryset"`
+	QueryAdd      []*QueryConfig        `yaml:"queryadd"`
+	QueryDel      []*QueryDelConfig     `yaml:"querydel"`
+	Via           string                `yaml:"via"`
 }
 
 func (r *RuleAPIConfig) SetDefault() {
-	r.ApiAddPrefixPath = utils.ProcessPath(r.ApiAddPrefixPath)
-	r.ApiSubPrefixPath = utils.ProcessPath(r.ApiSubPrefixPath)
+	r.AddPrefixPath = utils.ProcessPath(r.AddPrefixPath)
+	r.SubPrefixPath = utils.ProcessPath(r.SubPrefixPath)
 
-	r.ApiRewrite.SetDefault()
+	r.Rewrite.SetDefault()
 
 	for _, h := range r.HeaderSet {
 		h.SetDefault()
@@ -64,7 +64,7 @@ func (r *RuleAPIConfig) Check() configerr.ConfigError {
 		return configerr.NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
 	}
 
-	cfgErr := r.ApiRewrite.Check()
+	cfgErr := r.Rewrite.Check()
 	if cfgErr != nil && cfgErr.IsError() {
 		return cfgErr
 	}

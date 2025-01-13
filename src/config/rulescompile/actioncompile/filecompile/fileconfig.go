@@ -6,18 +6,18 @@ import (
 )
 
 type RuleFileCompileConfig struct {
-	File string
+	Path string
 	Cors *corscompile.CorsCompileConfig
 }
 
 func NewRuleFileCompileConfig(f *file.RuleFileConfig) (*RuleFileCompileConfig, error) {
-	cors, err := corscompile.NewCorsCompileConfig(&f.FileCors)
+	cors, err := corscompile.NewCorsCompileConfig(&f.Cors)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RuleFileCompileConfig{
-		File: f.File,
+		Path: f.Path,
 		Cors: cors,
 	}, nil
 }

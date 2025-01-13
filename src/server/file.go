@@ -18,7 +18,7 @@ func (s *HTTPServer) fileServer(rule *rulescompile.RuleCompileConfig, w http.Res
 		return
 	}
 
-	file, err := os.ReadFile(rule.File.File)
+	file, err := os.ReadFile(rule.File.Path)
 	if err != nil {
 		s.abortServerError(w)
 		return

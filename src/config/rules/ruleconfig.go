@@ -21,9 +21,9 @@ type RuleConfig struct {
 	match.MatchConfig             `yaml:",inline"`
 	remotetrust.RemoteTrustConfig `yaml:",inline"`
 
-	file.RuleFileConfig `yaml:",inline"`
-	dir.RuleDirConfig   `yaml:",inline"`
-	api.RuleAPIConfig   `yaml:",inline"`
+	File file.RuleFileConfig `yaml:"file"`
+	Dir  dir.RuleDirConfig   `yaml:"dir"`
+	Api  api.RuleAPIConfig   `yaml:"api"`
 }
 
 func (p *RuleConfig) SetDefault() {
@@ -31,11 +31,11 @@ func (p *RuleConfig) SetDefault() {
 	p.RemoteTrustConfig.SetDefault()
 
 	if p.Type == ProxyTypeFile {
-		p.RuleFileConfig.SetDefault()
+		p.File.SetDefault()
 	} else if p.Type == ProxyTypeDir {
-		p.RuleDirConfig.SetDefault()
+		p.Dir.SetDefault()
 	} else if p.Type == ProxyTypeAPI {
-		p.RuleAPIConfig.SetDefault()
+		p.Api.SetDefault()
 	}
 }
 
@@ -51,17 +51,17 @@ func (p *RuleConfig) Check() configerr.ConfigError {
 	}
 
 	if p.Type == ProxyTypeFile {
-		err := p.RuleFileConfig.Check()
+		err := p.File.Check()
 		if err != nil && err.IsError() {
 			return err
 		}
 	} else if p.Type == ProxyTypeDir {
-		err := p.RuleDirConfig.Check()
+		err := p.Dir.Check()
 		if err != nil && err.IsError() {
 			return err
 		}
 	} else if p.Type == ProxyTypeAPI {
-		err := p.RuleAPIConfig.Check()
+		err := p.Api.Check()
 		if err != nil && err.IsError() {
 			return err
 		}

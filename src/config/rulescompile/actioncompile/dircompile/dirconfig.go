@@ -7,7 +7,7 @@ import (
 )
 
 type RuleDirCompileConfig struct {
-	Dir           string
+	BasePath      string
 	IndexFile     []*IndexFileCompileConfig
 	IgnoreFile    []*IgnoreFileCompileConfig
 	AddPrefixPath string
@@ -19,7 +19,7 @@ type RuleDirCompileConfig struct {
 func NewRuleDirCompileConfig(r *dir.RuleDirConfig) (*RuleDirCompileConfig, error) {
 	Index := make([]*IndexFileCompileConfig, 0, len(r.IndexFile))
 	for _, i := range r.IndexFile {
-		file, err := NewIndexFileCompileConfig(&i)
+		file, err := NewIndexFileCompileConfig(i)
 		if err != nil {
 			return nil, err
 		}
@@ -28,29 +28,29 @@ func NewRuleDirCompileConfig(r *dir.RuleDirConfig) (*RuleDirCompileConfig, error
 
 	Ignore := make([]*IgnoreFileCompileConfig, 0, len(r.IgnoreFile))
 	for _, i := range r.IgnoreFile {
-		file, err := NewIgnoreFileCompileConfig(&i)
+		file, err := NewIgnoreFileCompileConfig(i)
 		if err != nil {
 			return nil, err
 		}
 		Ignore = append(Ignore, file)
 	}
 
-	rewrite, err := rewritecompile.NewRewriteCompileConfig(&r.DirRewrite)
+	rewrite, err := rewritecompile.NewRewriteCompileConfig(&r.Rewrite)
 	if err != nil {
 		return nil, err
 	}
 
-	cors, err := corscompile.NewCorsCompileConfig(&r.DirCors)
+	cors, err := corscompile.NewCorsCompileConfig(&r.Cors)
 	if err != nil {
 		return nil, err
 	}
 
 	return &RuleDirCompileConfig{
-		Dir:           r.Dir,
+		BasePath:      r.BasePath,
 		IndexFile:     Index,
 		IgnoreFile:    Ignore,
-		AddPrefixPath: r.DirAddPrefixPath,
-		SubPrefixPath: r.DirSubPrefixPath,
+		AddPrefixPath: r.AddPrefixPath,
+		SubPrefixPath: r.SubPrefixPath,
 		Rewrite:       rewrite,
 		Cors:          cors,
 	}, nil

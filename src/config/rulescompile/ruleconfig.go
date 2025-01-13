@@ -56,7 +56,7 @@ func NewRuleCompileConfig(r *rules.RuleConfig) (*RuleCompileConfig, error) {
 	}
 
 	if typeID == ProxyTypeFile {
-		file, err := filecompile.NewRuleFileCompileConfig(&r.RuleFileConfig)
+		file, err := filecompile.NewRuleFileCompileConfig(&r.File)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func NewRuleCompileConfig(r *rules.RuleConfig) (*RuleCompileConfig, error) {
 			File:                     file,
 		}, nil
 	} else if typeID == ProxyTypeDir {
-		dir, err := dircompile.NewRuleDirCompileConfig(&r.RuleDirConfig)
+		dir, err := dircompile.NewRuleDirCompileConfig(&r.Dir)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func NewRuleCompileConfig(r *rules.RuleConfig) (*RuleCompileConfig, error) {
 			Dir:                      dir,
 		}, nil
 	} else if typeID == ProxyTypeAPI {
-		api, err := apicompile.NewRuleAPICompileConfig(&r.RuleAPIConfig)
+		api, err := apicompile.NewRuleAPICompileConfig(&r.Api)
 		if err != nil {
 			return nil, err
 		}

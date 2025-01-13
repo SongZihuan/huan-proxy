@@ -27,7 +27,7 @@ type RuleAPICompileConfig struct {
 }
 
 func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error) {
-	rewrite, err := rewritecompile.NewRewriteCompileConfig(&r.ApiRewrite)
+	rewrite, err := rewritecompile.NewRewriteCompileConfig(&r.Rewrite)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	HeaderSet := make([]*HeaderCompileConfig, 0, len(r.HeaderSet))
 	for _, v := range r.HeaderSet {
-		h, err := NewHeaderCompileConfig(&v)
+		h, err := NewHeaderCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -50,7 +50,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	HeaderAdd := make([]*HeaderCompileConfig, 0, len(r.HeaderAdd))
 	for _, v := range r.HeaderAdd {
-		h, err := NewHeaderCompileConfig(&v)
+		h, err := NewHeaderCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +59,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	HeaderDel := make([]*HeaderDelCompileConfig, 0, len(r.HeaderDel))
 	for _, v := range r.HeaderDel {
-		h, err := NewHeaderDelCompileConfig(&v)
+		h, err := NewHeaderDelCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +68,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	QuerySet := make([]*QueryCompileConfig, 0, len(r.QuerySet))
 	for _, v := range r.QuerySet {
-		q, err := NewQueryCompileConfig(&v)
+		q, err := NewQueryCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -77,7 +77,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	QueryAdd := make([]*QueryCompileConfig, 0, len(r.QueryAdd))
 	for _, v := range r.QueryAdd {
-		q, err := NewQueryCompileConfig(&v)
+		q, err := NewQueryCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	QueryDel := make([]*QueryDelCompileConfig, 0, len(r.QueryDel))
 	for _, v := range r.QueryDel {
-		q, err := NewQueryDelCompileConfig(&v)
+		q, err := NewQueryDelCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
@@ -97,8 +97,8 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 		Address:       r.Address,
 		TargetURL:     targetURL,
 		Server:        server,
-		AddPrefixPath: r.ApiAddPrefixPath,
-		SubPrefixPath: r.ApiSubPrefixPath,
+		AddPrefixPath: r.AddPrefixPath,
+		SubPrefixPath: r.SubPrefixPath,
 		Rewrite:       rewrite,
 		HeaderSet:     HeaderSet,
 		HeaderAdd:     HeaderAdd,

@@ -5,7 +5,7 @@ import (
 )
 
 type RuleListConfig struct {
-	Rules []RuleConfig `yaml:"rules"`
+	Rules []*RuleConfig `yaml:"rules"`
 }
 
 func (r *RuleListConfig) SetDefault() {

@@ -8,22 +8,22 @@ import (
 )
 
 type RuleDirConfig struct {
-	Dir              string                `yaml:"dir"`
-	IndexFile        []IndexFileConfig     `yaml:"indexfile"`
-	IgnoreFile       []IgnoreFileConfig    `yaml:"ignorefile"`
-	DirAddPrefixPath string                `yaml:"addprefixpath"` // Dir前缀避免充满（yaaml忽略）
-	DirSubPrefixPath string                `yaml:"subprefixpath"` // Dir前缀避免充满（yaaml忽略）
-	DirRewrite       rewrite.RewriteConfig `yaml:"rewrite"`       // Dir前缀避免充满（yaaml忽略）
-	DirCors          cors.CorsConfig       `yaml:"cors"`          // Dir前缀避免充满（yaaml忽略）
+	BasePath      string                `yaml:"basepath"`
+	IndexFile     []*IndexFileConfig    `yaml:"indexfile"`
+	IgnoreFile    []*IgnoreFileConfig   `yaml:"ignorefile"`
+	AddPrefixPath string                `yaml:"addprefixpath"`
+	SubPrefixPath string                `yaml:"subprefixpath"`
+	Rewrite       rewrite.RewriteConfig `yaml:"rewrite"`
+	Cors          cors.CorsConfig       `yaml:"cors"`
 }
 
 func (r *RuleDirConfig) SetDefault() {
-	r.Dir = utils.ProcessPath(r.Dir)
-	r.DirAddPrefixPath = utils.ProcessPath(r.DirAddPrefixPath)
-	r.DirSubPrefixPath = utils.ProcessPath(r.DirSubPrefixPath)
+	r.BasePath = utils.ProcessPath(r.BasePath)
+	r.AddPrefixPath = utils.ProcessPath(r.AddPrefixPath)
+	r.SubPrefixPath = utils.ProcessPath(r.SubPrefixPath)
 
 	if len(r.IndexFile) == 0 {
-		r.IndexFile = []IndexFileConfig{
+		r.IndexFile = []*IndexFileConfig{
 			{
 				Regex: "disable",
 				File:  "index.html",
@@ -51,8 +51,8 @@ func (r *RuleDirConfig) SetDefault() {
 		i.SetDefault()
 	}
 
-	r.DirRewrite.SetDefault()
-	r.DirCors.SetDefault()
+	r.Rewrite.SetDefault()
+	r.Cors.SetDefault()
 }
 
 func (r *RuleDirConfig) Check() configerr.ConfigError {
@@ -71,12 +71,12 @@ func (r *RuleDirConfig) Check() configerr.ConfigError {
 		}
 	}
 
-	err := r.DirRewrite.Check()
+	err := r.Rewrite.Check()
 	if err != nil && err.IsError() {
 		return err
 	}
 
-	err = r.DirCors.Check()
+	err = r.Cors.Check()
 	if err != nil && err.IsError() {
 		return err
 	}
