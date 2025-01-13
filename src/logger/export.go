@@ -1,5 +1,9 @@
 package logger
 
+import (
+	"io"
+)
+
 func Executablef(format string, args ...interface{}) string {
 	if !IsReady() {
 		return ""
@@ -96,4 +100,45 @@ func Panic(args ...interface{}) {
 		return
 	}
 	globalLogger.Panic(args...)
+}
+
+func DebugWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.DebugWriter()
+}
+
+func InfoWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.InfoWriter()
+}
+
+func WarningWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.WarningWriter()
+}
+
+func TagWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.TagWriter()
+}
+
+func ErrorWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.ErrorWriter()
+}
+func PanicWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.PanicWriter()
 }

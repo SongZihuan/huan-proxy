@@ -7,6 +7,7 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"github.com/SongZihuan/huan-proxy/src/server"
 	"github.com/SongZihuan/huan-proxy/src/utils"
+	"os"
 )
 
 func MainV1() int {
@@ -39,7 +40,7 @@ func MainV1() int {
 
 	cfg := config.Config()
 
-	err = logger.InitLogger()
+	err = logger.InitLogger(os.Stdout, os.Stderr)
 	if err != nil {
 		return utils.ExitByError(err)
 	}

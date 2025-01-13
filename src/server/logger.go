@@ -6,22 +6,10 @@ package server
 
 import (
 	"fmt"
-	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"io"
 	"net/http"
-	"os"
 	"time"
-)
-
-type consoleColorModeValue int
-
-var DefaultWriter io.Writer = os.Stdout
-
-const (
-	autoColor consoleColorModeValue = iota
-	disableColor
-	forceColor
 )
 
 const (
@@ -34,8 +22,6 @@ const (
 	cyan    = "\033[97;46m"
 	reset   = "\033[0m"
 )
-
-var consoleColorMode = autoColor
 
 // LoggerConfig defines the config for Logger middleware.
 type LoggerConfig struct {
@@ -125,15 +111,9 @@ func (p *LogFormatterParams) ResetColor() string {
 	return reset
 }
 
-// IsOutputColor indicates whether can colors be outputted to the log.
-func (p *LogFormatterParams) IsOutputColor() bool {
-	return consoleColorMode == forceColor || (consoleColorMode == autoColor && p.isTerm)
-}
-
-// defaultLogFormatter is the default log format function Logger middleware uses.
-var defaultLogFormatter = func(param LogFormatterParams) string {
+func (s *HTTPServer) Formatter(param LogFormatterParams) string {
 	var statusColor, methodColor, resetColor string
-	if param.IsOutputColor() {
+	if s.isTerm {
 		statusColor = param.StatusCodeColor()
 		methodColor = param.MethodColor()
 		resetColor = param.ResetColor()
@@ -152,7 +132,6 @@ var defaultLogFormatter = func(param LogFormatterParams) string {
 	)
 }
 
-// LoggerWithConfig instance a Logger middleware with config.
 func (s *HTTPServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Start timer
 	start := time.Now()
@@ -166,7 +145,7 @@ func (s *HTTPServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, n
 
 	param := LogFormatterParams{
 		Request: r,
-		isTerm:  flagparser.Term(),
+		isTerm:  s.isTerm,
 		Keys:    make(map[string]any),
 	}
 
@@ -185,5 +164,5 @@ func (s *HTTPServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, n
 
 	param.Path = path
 
-	logger.Info(s.formatter(param))
+	logger.Info(s.Formatter(param))
 }

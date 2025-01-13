@@ -98,10 +98,6 @@ func ConfigFile() string {
 	return data.ConfigFile()
 }
 
-func Term() bool {
-	return data.Term()
-}
-
 func SetOutput(writer io.Writer) {
 	data.SetOutput(writer)
 }

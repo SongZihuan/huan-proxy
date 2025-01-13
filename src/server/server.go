@@ -7,18 +7,19 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"github.com/SongZihuan/huan-proxy/src/utils"
+	"github.com/mattn/go-isatty"
 	"net/http"
+	"os"
 	"strings"
 )
 
 var ServerStop = fmt.Errorf("server stop")
 
 type HTTPServer struct {
-	address   string
-	cfg       *config.ConfigStruct
-	formatter func(param LogFormatterParams) string
-	skip      map[string]struct{}
-	isTerm    bool
+	address string
+	cfg     *config.ConfigStruct
+	skip    map[string]struct{}
+	isTerm  bool
 }
 
 func NewServer() *HTTPServer {
@@ -26,14 +27,25 @@ func NewServer() *HTTPServer {
 		panic("not ready")
 	}
 
-	var formatter = defaultLogFormatter
 	var skip = make(map[string]struct{}, 10)
+	var isTerm = true
+	var out = logger.InfoWriter()
+
+	w, ok := out.(*os.File)
+	if !ok {
+		isTerm = false
+	} else if !isatty.IsTerminal(w.Fd()) && !isatty.IsCygwinTerminal(w.Fd()) { // 非终端
+		isTerm = false
+	} else if os.Getenv("TERM") == "dumb" {
+		// TERM为dump表示终端为基础模式，不支持高级显示
+		isTerm = false
+	}
 
 	return &HTTPServer{
-		address:   config.Config().Yaml.Http.Address,
-		cfg:       config.Config(),
-		formatter: formatter,
-		skip:      skip,
+		address: config.Config().Yaml.Http.Address,
+		cfg:     config.Config(),
+		skip:    skip,
+		isTerm:  isTerm,
 	}
 }
 

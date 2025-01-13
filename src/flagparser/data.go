@@ -35,9 +35,6 @@ type flagData struct {
 	ConfigFileData  string
 	ConfigFileName  string
 	ConfigFileUsage string
-	TermData        bool
-	TermName        string
-	TermUsage       string
 
 	Usage string
 }
@@ -63,9 +60,6 @@ func initData() {
 		ConfigFileData:  "config.yaml",
 		ConfigFileName:  "config",
 		ConfigFileUsage: fmt.Sprintf("%s", "The location of the running configuration file of the backend service. The option is a string, the default value is config.yaml in the running directory."),
-		TermData:        false,
-		TermName:        "term",
-		TermUsage:       "Terminal output mode. If you have this program running in the foreground terminal (standard output is the terminal), you can turn this option on to get formatted logs.",
 		Usage:           "",
 	}
 
@@ -173,9 +167,6 @@ func (d *flagData) setFlag() {
 
 	flag.StringVar(&d.ConfigFileData, data.ConfigFileName, data.ConfigFileData, data.ConfigFileUsage)
 	flag.StringVar(&d.ConfigFileData, data.ConfigFileName[0:1], data.ConfigFileData, data.ConfigFileUsage)
-
-	flag.BoolVar(&d.TermData, data.TermName, data.TermData, data.TermUsage)
-	flag.BoolVar(&d.TermData, data.TermName[0:1], data.TermData, data.TermUsage)
 
 	flag.Usage = func() {
 		_, _ = d.PrintUsage()
@@ -302,14 +293,6 @@ func (d *flagData) ConfigFile() string {
 	}
 
 	return d.ConfigFileData
-}
-
-func (d *flagData) Term() bool {
-	if !d.isReady() {
-		panic("flag not ready")
-	}
-
-	return d.TermData
 }
 
 func (d *flagData) SetOutput(writer io.Writer) {

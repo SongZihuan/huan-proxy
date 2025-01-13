@@ -50,8 +50,10 @@ type Logger struct {
 }
 
 var globalLogger *Logger = nil
+var DefaultWarnWriter = os.Stdout
+var DefaultErrorWriter = os.Stderr
 
-func InitLogger() error {
+func InitLogger(warnWriter, errWriter io.Writer) error {
 	if !config.IsReady() {
 		panic("config is not ready")
 	}
@@ -60,6 +62,14 @@ func InitLogger() error {
 	logLevel, ok := levelMap[level]
 	if !ok {
 		return fmt.Errorf("invalid log level: %s", level)
+	}
+
+	if warnWriter == nil {
+		warnWriter = DefaultWarnWriter
+	}
+
+	if errWriter == nil {
+		errWriter = DefaultErrorWriter
 	}
 
 	logger := &Logger{
@@ -212,4 +222,27 @@ func (l *Logger) Panic(args ...interface{}) {
 
 	str := fmt.Sprint(args...)
 	_, _ = fmt.Fprintf(l.errWriter, "%s: %s\n", l.args0Name, str)
+}
+
+func (l *Logger) DebugWriter() io.Writer {
+	return l.warnWriter
+}
+
+func (l *Logger) InfoWriter() io.Writer {
+	return l.warnWriter
+}
+
+func (l *Logger) WarningWriter() io.Writer {
+	return l.warnWriter
+}
+
+func (l *Logger) TagWriter() io.Writer {
+	return l.warnWriter
+}
+
+func (l *Logger) ErrorWriter() io.Writer {
+	return l.errWriter
+}
+func (l *Logger) PanicWriter() io.Writer {
+	return l.errWriter
 }
