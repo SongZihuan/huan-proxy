@@ -25,5 +25,5 @@ func (s *HTTPServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Requ
 			return true
 		}
 	}
-	return true
+	return false
 }
