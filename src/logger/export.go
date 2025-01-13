@@ -102,43 +102,170 @@ func Panic(args ...interface{}) {
 	globalLogger.Panic(args...)
 }
 
-func DebugWriter() io.Writer {
+func TagWrite(msg string) {
 	if !IsReady() {
-		return DefaultWarnWriter
+		return
 	}
-	return globalLogger.DebugWriter()
+	globalLogger.TagSkip(1, msg)
 }
 
-func InfoWriter() io.Writer {
+func DebugWrite(msg string) {
 	if !IsReady() {
-		return DefaultWarnWriter
+		return
 	}
-	return globalLogger.InfoWriter()
+	globalLogger.DebugWrite(msg)
 }
 
-func WarningWriter() io.Writer {
+func InfoWrite(msg string) {
 	if !IsReady() {
-		return DefaultWarnWriter
+		return
 	}
-	return globalLogger.WarningWriter()
+	globalLogger.InfoWrite(msg)
 }
 
-func TagWriter() io.Writer {
+func WarnWrite(msg string) {
 	if !IsReady() {
-		return DefaultWarnWriter
+		return
 	}
-	return globalLogger.TagWriter()
+	globalLogger.WarnWrite(msg)
 }
 
-func ErrorWriter() io.Writer {
+func ErrorWrite(msg string) {
 	if !IsReady() {
-		return DefaultWarnWriter
+		return
 	}
-	return globalLogger.ErrorWriter()
+	globalLogger.ErrorWrite(msg)
 }
-func PanicWriter() io.Writer {
+
+func PanicWrite(msg string) {
+	if !IsReady() {
+		return
+	}
+	globalLogger.PanicWrite(msg)
+}
+
+func GetDebugWriter() io.Writer {
 	if !IsReady() {
 		return DefaultWarnWriter
 	}
-	return globalLogger.PanicWriter()
+	return globalLogger.GetDebugWriter()
+}
+
+func GetInfoWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.GetInfoWriter()
+}
+
+func GetWarningWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.GetWarningWriter()
+}
+
+func GetTagWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.GetTagWriter()
+}
+
+func GetErrorWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.GetErrorWriter()
+}
+
+func GetPanicWriter() io.Writer {
+	if !IsReady() {
+		return DefaultWarnWriter
+	}
+	return globalLogger.GetPanicWriter()
+}
+
+func IsDebugTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsDebugTerm()
+}
+
+func IsInfoTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsDebugTerm()
+}
+
+func IsTagTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsTagTerm()
+}
+
+func IsWarnTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsWarnTerm()
+}
+
+func IsErrorTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsErrorTerm()
+}
+
+func IsPanicTerm() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsPanicTerm()
+}
+
+func IsDebugTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsDebugTerm()
+}
+
+func IsInfoTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsInfoTermNotDumb()
+}
+
+func IsTagTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsTagTermNotDumb()
+}
+
+func IsWarnTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsWarnTermNotDumb()
+}
+
+func IsErrorTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsErrorTermNotDumb()
+}
+
+func IsPanicTermNotDumb() bool {
+	if !IsReady() {
+		return false
+	}
+	return globalLogger.IsPanicTermNotDumb()
 }

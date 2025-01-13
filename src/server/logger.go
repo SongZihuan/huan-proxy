@@ -6,7 +6,6 @@ package server
 
 import (
 	"fmt"
-	"github.com/SongZihuan/huan-proxy/src/logger"
 	"io"
 	"net/http"
 	"time"
@@ -164,5 +163,7 @@ func (s *HTTPServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, n
 
 	param.Path = path
 
-	logger.Info(s.Formatter(param))
+	if s.writer != nil {
+		s.writer(s.Formatter(param))
+	}
 }

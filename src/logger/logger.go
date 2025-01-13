@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/utils"
+	"github.com/mattn/go-isatty"
 	"io"
 	"os"
 )
@@ -224,25 +225,153 @@ func (l *Logger) Panic(args ...interface{}) {
 	_, _ = fmt.Fprintf(l.errWriter, "%s: %s\n", l.args0Name, str)
 }
 
-func (l *Logger) DebugWriter() io.Writer {
+func (l *Logger) TagWrite(msg string) {
+	l.TagSkipWrite(1, msg)
+}
+
+func (l *Logger) TagSkipWrite(skip int, msg string) {
+	if !l.logTag {
+		return
+	}
+
+	funcName, file, _, line := utils.GetCallingFunctionInfo(skip + 1)
+
+	_, _ = fmt.Fprintf(l.warnWriter, "%s: TAG %s %s %s:%d\n", l.args0Name, msg, funcName, file, line)
+}
+
+func (l *Logger) DebugWrite(msg string) {
+	if l.logLevel > levelDebug {
+		return
+	}
+
+	_, _ = fmt.Fprintf(l.warnWriter, "%s: %s\n", l.args0Name, msg)
+}
+
+func (l *Logger) InfoWrite(msg string) {
+	if l.logLevel > levelInfo {
+		return
+	}
+
+	_, _ = fmt.Fprintf(l.warnWriter, "%s: %s\n", l.args0Name, msg)
+}
+
+func (l *Logger) WarnWrite(msg string) {
+	if l.logLevel > levelWarn {
+		return
+	}
+
+	_, _ = fmt.Fprintf(l.warnWriter, "%s: %\ns", l.args0Name, msg)
+}
+
+func (l *Logger) ErrorWrite(msg string) {
+	if l.logLevel > levelError {
+		return
+	}
+
+	_, _ = fmt.Fprintf(l.errWriter, "%s: %s\n", l.args0Name, msg)
+}
+
+func (l *Logger) PanicWrite(msg string) {
+	if l.logLevel > levelPanic {
+		return
+	}
+
+	_, _ = fmt.Fprintf(l.errWriter, "%s: %s\n", l.args0Name, msg)
+}
+
+func (l *Logger) GetDebugWriter() io.Writer {
 	return l.warnWriter
 }
 
-func (l *Logger) InfoWriter() io.Writer {
+func (l *Logger) GetInfoWriter() io.Writer {
 	return l.warnWriter
 }
 
-func (l *Logger) WarningWriter() io.Writer {
+func (l *Logger) GetWarningWriter() io.Writer {
 	return l.warnWriter
 }
 
-func (l *Logger) TagWriter() io.Writer {
+func (l *Logger) GetTagWriter() io.Writer {
 	return l.warnWriter
 }
 
-func (l *Logger) ErrorWriter() io.Writer {
+func (l *Logger) GetErrorWriter() io.Writer {
 	return l.errWriter
 }
-func (l *Logger) PanicWriter() io.Writer {
+
+func (l *Logger) GetPanicWriter() io.Writer {
 	return l.errWriter
+}
+
+func (l *Logger) isWarnWriterTerm() bool {
+	w, ok := l.warnWriter.(*os.File)
+	if !ok {
+		return false
+	} else if !isatty.IsTerminal(w.Fd()) && !isatty.IsCygwinTerminal(w.Fd()) { // 非终端
+		return false
+	}
+	return true
+}
+
+func (l *Logger) isErrWriterTerm() bool {
+	w, ok := l.errWriter.(*os.File)
+	if !ok {
+		return false
+	} else if !isatty.IsTerminal(w.Fd()) && !isatty.IsCygwinTerminal(w.Fd()) { // 非终端
+		return false
+	}
+	return true
+}
+
+func (l *Logger) isTermDump() bool {
+	// TERM为dump表示终端为基础模式，不支持高级显示
+	return os.Getenv("TERM") == "dumb"
+}
+
+func (l *Logger) IsDebugTerm() bool {
+	return l.isWarnWriterTerm()
+}
+
+func (l *Logger) IsInfoTerm() bool {
+	return l.isWarnWriterTerm()
+}
+
+func (l *Logger) IsWarnTerm() bool {
+	return l.isWarnWriterTerm()
+}
+
+func (l *Logger) IsTagTerm() bool {
+	return l.isWarnWriterTerm()
+}
+
+func (l *Logger) IsErrorTerm() bool {
+	return l.isErrWriterTerm()
+}
+
+func (l *Logger) IsPanicTerm() bool {
+	return l.isErrWriterTerm()
+}
+
+func (l *Logger) IsDebugTermNotDumb() bool {
+	return l.isWarnWriterTerm() && !l.isTermDump()
+}
+
+func (l *Logger) IsInfoTermNotDumb() bool {
+	return l.isWarnWriterTerm() && !l.isTermDump()
+}
+
+func (l *Logger) IsWarnTermNotDumb() bool {
+	return l.isWarnWriterTerm() && !l.isTermDump()
+}
+
+func (l *Logger) IsTagTermNotDumb() bool {
+	return l.isWarnWriterTerm() && !l.isTermDump()
+}
+
+func (l *Logger) IsErrorTermNotDumb() bool {
+	return l.isErrWriterTerm() && !l.isTermDump()
+}
+
+func (l *Logger) IsPanicTermNotDumb() bool {
+	return l.isErrWriterTerm() && !l.isTermDump()
 }
