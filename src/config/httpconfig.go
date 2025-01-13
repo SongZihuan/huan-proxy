@@ -1,13 +1,17 @@
 package config
 
+import (
+	"fmt"
+	"github.com/SongZihuan/huan-proxy/src/config/configerr"
+	"net/url"
+)
+
 type HttpConfig struct {
-	Address        string            `yaml:"address"`
-	RemoteTrust    RemoteTrustConfig `yaml:"remotetrust"`
-	StopWaitSecond int               `yaml:"stopwaitsecond"`
-	Cors           CorsConfig        `yaml:"cors"`
+	Address        string `yaml:"address"`
+	StopWaitSecond int    `yaml:"stopwaitsecond"`
 }
 
-func (h *HttpConfig) setDefault(global *GlobalConfig) {
+func (h *HttpConfig) SetDefault(global *GlobalConfig) {
 	if h.Address == "" {
 		h.Address = "localhost:2689"
 	}
@@ -15,21 +19,11 @@ func (h *HttpConfig) setDefault(global *GlobalConfig) {
 	if h.StopWaitSecond <= 0 {
 		h.StopWaitSecond = 10
 	}
-
-	h.RemoteTrust.setDefault(global)
-	h.Cors.setDefault()
 }
 
-func (h *HttpConfig) check(co *CorsOrigin) ConfigError {
-	err := h.RemoteTrust.check()
-	if err != nil && err.IsError() {
-		return err
+func (h *HttpConfig) Check() configerr.ConfigError {
+	if _, err := url.Parse(h.Address); err != nil {
+		return configerr.NewConfigError(fmt.Sprintf("http address error: %s", err.Error()))
 	}
-
-	err = h.Cors.check(co)
-	if err != nil && err.IsError() {
-		return err
-	}
-
 	return nil
 }

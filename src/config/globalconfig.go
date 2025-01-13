@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"os"
 )
@@ -25,12 +26,12 @@ var levelMap = map[string]bool{
 }
 
 type GlobalConfig struct {
-	Mode     string           `json:"mode"`
-	LogLevel string           `json:"loglevel"`
-	LogTag   utils.StringBool `json:"logtag"`
+	Mode     string           `yaml:"mode"`
+	LogLevel string           `yaml:"loglevel"`
+	LogTag   utils.StringBool `yaml:"logtag"`
 }
 
-func (g *GlobalConfig) setDefault() {
+func (g *GlobalConfig) SetDefault() {
 	if g.Mode == "" {
 		g.Mode = os.Getenv(EnvModeName)
 	}
@@ -56,13 +57,13 @@ func (g *GlobalConfig) setDefault() {
 	return
 }
 
-func (g *GlobalConfig) check() ConfigError {
+func (g *GlobalConfig) Check() configerr.ConfigError {
 	if g.Mode != DebugMode && g.Mode != ReleaseMode && g.Mode != TestMode {
-		return NewConfigError("bad mode")
+		return configerr.NewConfigError("bad mode")
 	}
 
 	if _, ok := levelMap[g.LogLevel]; !ok {
-		return NewConfigError("log level error")
+		return configerr.NewConfigError("log level error")
 	}
 
 	return nil

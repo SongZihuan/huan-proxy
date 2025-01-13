@@ -6,9 +6,7 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
-	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net/http"
-	"strings"
 )
 
 var ServerStop = fmt.Errorf("server stop")
@@ -55,43 +53,4 @@ func (s *HTTPServer) run() error {
 
 func (s *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.LoggerServerHTTP(w, r, s.NormalServeHTTP)
-}
-
-func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.writeHuanProxyHeader(r)
-	if !s.checkProxyTrust(w, r) {
-		return
-	}
-
-	func() {
-		for ruleIndex, rule := range s.cfg.Yaml.Rules.Rules {
-			if rule.Type == config.ProxyTypeFile {
-				url := utils.ProcessPath(r.URL.Path)
-				if url == rule.BasePath {
-					if s.corsHandler(w, r) {
-						s.fileServer(rule, w, r)
-					}
-					return
-				}
-			} else if rule.Type == config.ProxyTypeDir {
-				if r.Method == http.MethodGet {
-					urlpath := utils.ProcessPath(r.URL.Path)
-					if urlpath == rule.BasePath || strings.HasPrefix(urlpath, rule.BasePath+"/") {
-						if s.corsHandler(w, r) {
-							s.dirServer(ruleIndex, rule, w, r)
-						}
-						return
-					}
-				}
-			} else if rule.Type == config.ProxyTypeAPI {
-				urlpath := utils.ProcessPath(r.URL.Path)
-				if urlpath == rule.BasePath || strings.HasPrefix(urlpath, rule.BasePath+"/") {
-					s.apiServer(ruleIndex, rule, w, r)
-					return
-				}
-			}
-		}
-
-		s.abortNotFound(w)
-	}()
 }

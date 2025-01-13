@@ -3,14 +3,15 @@ package server
 import (
 	"fmt"
 	resource "github.com/SongZihuan/huan-proxy"
-	"github.com/SongZihuan/huan-proxy/src/config"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/apicompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net/http"
 	"strings"
 )
 
-const XHuanProxyHeaer = config.XHuanProxyHeaer
-const ViaHeader = config.ViaHeader
+const XHuanProxyHeaer = apicompile.XHuanProxyHeaer
+const ViaHeader = apicompile.ViaHeader
 
 func (s *HTTPServer) writeHuanProxyHeader(r *http.Request) {
 	version := strings.TrimSpace(utils.StringToOnlyPrint(resource.Version))
@@ -24,8 +25,8 @@ func (s *HTTPServer) writeHuanProxyHeader(r *http.Request) {
 	r.Header.Set(XHuanProxyHeaer, h)
 }
 
-func (s *HTTPServer) writeViaHeader(rule *config.ProxyConfig, r *http.Request) {
-	info := fmt.Sprintf("%s %s", r.Proto, rule.Via)
+func (s *HTTPServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, r *http.Request) {
+	info := fmt.Sprintf("%s %s", r.Proto, rule.Api.Via)
 
 	h := r.Header.Get(ViaHeader)
 	if h == "" {

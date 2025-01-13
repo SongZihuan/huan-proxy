@@ -1,20 +1,24 @@
 package server
 
 import (
-	"github.com/SongZihuan/huan-proxy/src/config"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/gabriel-vasile/mimetype"
 	"net/http"
 	"os"
 )
 
-func (s *HTTPServer) fileServer(rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HTTPServer) fileServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+	if !s.cors(rule.File.Cors, w, r) {
+		return
+	}
+
 	if r.Method != http.MethodGet {
 		s.abortMethodNotAllowed(w)
 		return
 	}
 
-	file, err := os.ReadFile(rule.File)
+	file, err := os.ReadFile(rule.File.File)
 	if err != nil {
 		s.abortServerError(w)
 		return

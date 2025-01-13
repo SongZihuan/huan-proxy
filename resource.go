@@ -12,3 +12,6 @@ var License string
 
 //go:embed REEPORT
 var Report string
+
+//go:embed VIA
+var Via string

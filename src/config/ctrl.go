@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 )
 
@@ -11,19 +12,19 @@ func newConfig() ConfigStruct {
 	}
 }
 
-func InitConfig() ConfigError {
+func InitConfig() configerr.ConfigError {
 	if !flagparser.IsReady() {
-		return NewConfigError("flag not ready")
+		return configerr.NewConfigError("flag not ready")
 	}
 
 	config = newConfig()
-	err := config.ready()
+	err := config.Init()
 	if err != nil && err.IsError() {
 		return err
 	}
 
 	if !config.configReady {
-		return NewConfigError("config not ready")
+		return configerr.NewConfigError("config not ready")
 	}
 
 	return nil

@@ -2,76 +2,52 @@ package server
 
 import (
 	"fmt"
-	"github.com/SongZihuan/huan-proxy/src/config"
-	"github.com/SongZihuan/huan-proxy/src/logger"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
-func (s *HTTPServer) apiServer(ruleIndex int, rule *config.ProxyConfig, w http.ResponseWriter, r *http.Request) {
-	proxy := s.cfg.ProxyServer.Get(ruleIndex)
+func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+	proxy := rule.Api.Server
 	if proxy == nil {
 		s.abortServerError(w)
 		return
 	}
 
-	targetURL, err := url.Parse(rule.Address)
-	if err != nil {
-		s.abortServerError(w)
-		return
-	}
-
+	targetURL := rule.Api.TargetURL
 	r.URL.Scheme = targetURL.Scheme
 	r.URL.Host = targetURL.Host
 
 	s.processProxyHeader(r)
 
-	path := r.URL.Path
+	r.URL.Path = s.rewrite(utils.ProcessPath(r.URL.Path), rule.Api.AddPrefixPath, rule.Api.SubPrefixPath, rule.Api.Rewrite)
 
-	if strings.HasPrefix(path, rule.SubPrefixPath) {
-		path = path[len(rule.SubPrefixPath):]
-	}
-
-	path = rule.AddPrefixPath + path
-
-	if rule.RewriteReg != "" {
-		path, err = s.cfg.Rewrite.Rewrite(ruleIndex, path)
-		if err != nil {
-			s.abortServerError(w)
-			return
-		}
-	}
-
-	r.URL.Path = path
-
-	for _, h := range rule.Header {
+	for _, h := range rule.Api.HeaderSet {
 		r.Header.Set(h.Header, h.Value)
 	}
 
-	for _, h := range rule.HeaderAdd {
+	for _, h := range rule.Api.HeaderAdd {
 		r.Header.Add(h.Header, h.Value)
 	}
 
-	for _, h := range rule.HeaderDel {
-		r.Header.Del(h)
+	for _, h := range rule.Api.HeaderDel {
+		r.Header.Del(h.Header)
 	}
 
 	query := r.URL.Query()
 
-	for _, q := range rule.Query {
+	for _, q := range rule.Api.QuerySet {
 		query.Set(q.Query, q.Value)
 	}
 
-	for _, q := range rule.QueryAdd {
+	for _, q := range rule.Api.QueryAdd {
 		query.Add(q.Query, q.Value)
 	}
 
-	for _, q := range rule.QueryDel {
-		logger.Tagf("A '%s'", q)
-		query.Del(q)
+	for _, q := range rule.Api.QueryDel {
+		query.Del(q.Query)
 	}
 
 	r.URL.RawQuery = query.Encode()

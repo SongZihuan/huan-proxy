@@ -1,13 +1,14 @@
 package server
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"net/http"
 )
 
-func (s *HTTPServer) checkProxyTrust(w http.ResponseWriter, r *http.Request) bool {
-	if !s.cfg.Yaml.Http.RemoteTrust.Enable() {
+func (s *HTTPServer) checkProxyTrust(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) bool {
+	if !rule.UseTrustedIPs {
 		return true
 	}
 
@@ -23,10 +24,12 @@ func (s *HTTPServer) checkProxyTrust(w http.ResponseWriter, r *http.Request) boo
 	}
 
 	remoteIP := net.ParseIP(remoteIPStr)
+	if remoteIP == nil {
+		s.abortForbidden(w)
+		return false
+	}
 
-	trust := s.cfg.Yaml.Http.RemoteTrust.TrustedIPs
-
-	for _, t := range trust {
+	for _, t := range rule.TrustedIPs {
 		if utils.ValidIPv4(t) || utils.ValidIPv6(t) {
 			trustIP := net.ParseIP(t)
 			if trustIP == nil {
