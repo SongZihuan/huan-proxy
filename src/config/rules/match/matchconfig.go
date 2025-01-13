@@ -13,11 +13,14 @@ const (
 
 type MatchConfig struct {
 	MatchType string `yaml:"matchtype"`
-	Path      string `yaml:"path"`
+	MatchPath string `yaml:"matchpath"`
 }
 
 func (m *MatchConfig) SetDefault() {
-	m.Path = utils.ProcessPath(m.Path)
+	if m.MatchType == "" {
+		m.MatchType = PrefixMatch
+	}
+	m.MatchPath = utils.ProcessPath(m.MatchPath)
 }
 
 func (m *MatchConfig) Check() configerr.ConfigError {

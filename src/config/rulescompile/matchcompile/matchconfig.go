@@ -42,17 +42,17 @@ func NewMatchConfig(m *match.MatchConfig) (*MatchCompileConfig, error) {
 	res.MatchType = matchType
 
 	if matchType == RegexMatch {
-		reg, err := regexp.Compile(m.Path)
+		reg, err := regexp.Compile(m.MatchPath)
 		if err != nil {
 			return nil, err
 		}
 		res.MatchRegex = reg
 	} else if matchType == PrefixMatch || matchType == PrecisionMatch {
-		if !utils.IsValidURLPath(m.Path) {
+		if !utils.IsValidURLPath(m.MatchPath) {
 			return nil, fmt.Errorf("bad path")
 		}
 
-		res.MatchPath = utils.ProcessPath(m.Path)
+		res.MatchPath = utils.ProcessPath(m.MatchPath)
 	} else {
 		return nil, fmt.Errorf("bad match type")
 	}
