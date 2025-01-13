@@ -95,7 +95,6 @@ func (d *flagData) writeUsage() {
 			panic("can not get option name")
 		}
 
-		fmt.Printf("OPTION: %s\n", option+"Usage")
 		optionUsage, ok := val.FieldByName(option + "Usage").Interface().(string)
 		if !ok {
 			panic("can not get option Usage")

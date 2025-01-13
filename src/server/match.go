@@ -9,18 +9,18 @@ import (
 )
 
 func (s *HTTPServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Request) bool {
-	url := utils.ProcessPath(r.URL.Path)
+	url := utils.ProcessURLPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {
 		if rule.MatchRegex.MatchString(url) || rule.MatchRegex.MatchString(url+"/") {
 			return true
 		}
 	} else if rule.MatchType == matchcompile.PrefixMatch {
-		path := utils.ProcessPath(rule.MatchPath)
+		path := utils.ProcessURLPath(rule.MatchPath)
 		if url == path || strings.HasPrefix(url, path+"/") {
 			return true
 		}
 	} else if rule.MatchType == matchcompile.PrecisionMatch {
-		path := utils.ProcessPath(rule.MatchPath)
+		path := utils.ProcessURLPath(rule.MatchPath)
 		if url == path {
 			return true
 		}

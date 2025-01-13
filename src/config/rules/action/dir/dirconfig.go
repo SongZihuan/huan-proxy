@@ -4,7 +4,6 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/cors"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/rewrite"
-	"github.com/SongZihuan/huan-proxy/src/utils"
 )
 
 type RuleDirConfig struct {
@@ -18,10 +17,6 @@ type RuleDirConfig struct {
 }
 
 func (r *RuleDirConfig) SetDefault() {
-	r.BasePath = utils.ProcessPath(r.BasePath)
-	r.AddPrefixPath = utils.ProcessPath(r.AddPrefixPath)
-	r.SubPrefixPath = utils.ProcessPath(r.SubPrefixPath)
-
 	if len(r.IndexFile) == 0 {
 		r.IndexFile = []*IndexFileConfig{
 			{

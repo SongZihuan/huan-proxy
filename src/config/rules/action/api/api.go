@@ -24,8 +24,8 @@ type RuleAPIConfig struct {
 }
 
 func (r *RuleAPIConfig) SetDefault() {
-	r.AddPrefixPath = utils.ProcessPath(r.AddPrefixPath)
-	r.SubPrefixPath = utils.ProcessPath(r.SubPrefixPath)
+	r.AddPrefixPath = utils.ProcessURLPath(r.AddPrefixPath)
+	r.SubPrefixPath = utils.ProcessURLPath(r.SubPrefixPath)
 
 	r.Rewrite.SetDefault()
 

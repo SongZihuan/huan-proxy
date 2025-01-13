@@ -52,7 +52,7 @@ func NewMatchConfig(m *match.MatchConfig) (*MatchCompileConfig, error) {
 			return nil, fmt.Errorf("bad path")
 		}
 
-		res.MatchPath = utils.ProcessPath(m.MatchPath)
+		res.MatchPath = utils.ProcessURLPath(m.MatchPath)
 	} else {
 		return nil, fmt.Errorf("bad match type")
 	}

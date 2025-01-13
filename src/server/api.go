@@ -3,6 +3,7 @@ package server
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/rewritecompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"net/http"
@@ -22,7 +23,7 @@ func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 
 	s.processProxyHeader(r)
 
-	r.URL.Path = s.rewrite(utils.ProcessPath(r.URL.Path), rule.Api.AddPrefixPath, rule.Api.SubPrefixPath, rule.Api.Rewrite)
+	r.URL.Path = s.apiRewrite(utils.ProcessURLPath(r.URL.Path), rule.Api.AddPrefixPath, rule.Api.SubPrefixPath, rule.Api.Rewrite)
 
 	for _, h := range rule.Api.HeaderSet {
 		r.Header.Set(h.Header, h.Value)
@@ -54,6 +55,24 @@ func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 
 	s.writeViaHeader(rule, r)
 	proxy.ServeHTTP(w, r) // 反向代理
+}
+
+func (s *HTTPServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
+	srcpath = utils.ProcessURLPath(srcpath)
+	prefix = utils.ProcessURLPath(prefix)
+	suffix = utils.ProcessURLPath(suffix)
+
+	if strings.HasPrefix(srcpath, suffix) {
+		srcpath = srcpath[len(suffix):]
+	}
+
+	srcpath = prefix + srcpath
+
+	if rewrite.Use && rewrite.Regex != nil {
+		rewrite.Regex.ReplaceAllString(srcpath, rewrite.Target)
+	}
+
+	return srcpath
 }
 
 func (s *HTTPServer) processProxyHeader(r *http.Request) {

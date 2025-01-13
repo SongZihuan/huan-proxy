@@ -16,7 +16,7 @@ const IndexMaxDeep = 5
 const DefaultIgnoreFileMap = 20
 
 func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
-	if !s.cors(rule.File.Cors, w, r) {
+	if !s.cors(rule.Dir.Cors, w, r) {
 		return
 	}
 
@@ -29,16 +29,16 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 	fileAccess := ""                 // 访问目录
 	filePath := ""                   // 根部目录+访问目录=实际目录
 
-	url := utils.ProcessPath(r.URL.Path)
+	url := utils.ProcessURLPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {
-		fileAccess = s.rewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+		fileAccess = s.dirRewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
 		filePath = path.Join(dirBasePath, fileAccess)
 	} else {
 		if url == rule.MatchPath {
-			fileAccess = s.rewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+			fileAccess = s.dirRewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else if strings.HasPrefix(url, rule.MatchPath+"/") {
-			fileAccess = s.rewrite(url[len(rule.MatchPath+"/"):], rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+			fileAccess = s.dirRewrite(url[len(rule.MatchPath+"/"):], rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else {
 			s.abortNotFound(w)
@@ -89,16 +89,12 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 	s.statusOK(w)
 }
 
-func (s *HTTPServer) rewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
-	srcpath = utils.ProcessPath(srcpath)
-	prefix = utils.ProcessPath(prefix)
-	suffix = utils.ProcessPath(suffix)
-
+func (s *HTTPServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	if strings.HasPrefix(srcpath, suffix) {
 		srcpath = srcpath[len(suffix):]
 	}
 
-	srcpath = prefix + srcpath
+	srcpath = path.Join(prefix, srcpath)
 
 	if rewrite.Use && rewrite.Regex != nil {
 		rewrite.Regex.ReplaceAllString(srcpath, rewrite.Target)

@@ -21,7 +21,7 @@ func (m *MatchConfig) SetDefault() {
 		m.MatchType = PrefixMatch
 	}
 	if m.MatchType == PrefixMatch || m.MatchType == PrecisionMatch {
-		m.MatchPath = utils.ProcessPath(m.MatchPath)
+		m.MatchPath = utils.ProcessURLPath(m.MatchPath)
 	}
 }
 
