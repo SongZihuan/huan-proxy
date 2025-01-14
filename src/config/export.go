@@ -3,22 +3,35 @@ package config
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
-	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"os"
 )
 
 func InitConfig(configPath string) configerr.ConfigError {
-	if !flagparser.IsReady() {
-		return configerr.NewConfigError("flag not ready")
+	var err error
+	config, err = newConfig(configPath)
+	if err != nil {
+		return configerr.NewConfigError(err.Error())
 	}
 
-	config = newConfig(configPath)
-	err := config.Init()
+	cfgErr := config.Init()
+	if cfgErr != nil && cfgErr.IsError() {
+		return cfgErr
+	}
+
+	if !config.IsReady() {
+		return configerr.NewConfigError("config not ready")
+	}
+
+	return nil
+}
+
+func ReloadConfig() configerr.ConfigError {
+	err := config.Reload()
 	if err != nil && err.IsError() {
 		return err
 	}
 
-	if !config.configReady {
+	if !config.IsReady() {
 		return configerr.NewConfigError("config not ready")
 	}
 
@@ -41,12 +54,16 @@ func GetSignalChan() chan os.Signal {
 	return config.GetSignalChan()
 }
 
-func NotifyConfigFile() error {
-	return config.NotifyConfigFile()
+func GetConfigPathFile() string {
+	return config.GetConfigPathFile()
 }
 
-func CloseNotifyConfigFile() {
-	config.CloseNotifyConfigFile()
+func GetConfigFileDir() string {
+	return config.GetConfigFileDir()
 }
 
-var config ConfigStruct
+func GetConfigFileName() string {
+	return config.GetConfigFileName()
+}
+
+var config *ConfigStruct

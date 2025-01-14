@@ -101,10 +101,6 @@ func (l *Logger) Executablef(format string, args ...interface{}) string {
 	return l.args0
 }
 
-func (l *Logger) Executable() string {
-	return l.Executablef("")
-}
-
 func (l *Logger) Tagf(format string, args ...interface{}) {
 	l.TagSkipf(1, format, args...)
 }

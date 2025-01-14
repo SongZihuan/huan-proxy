@@ -20,21 +20,25 @@ type flagData struct {
 	flagSet    bool
 	flagParser bool
 
-	HelpData        bool
-	HelpName        string
-	HelpUsage       string
-	VersionData     bool
-	VersionName     string
-	VersionUsage    string
-	LicenseData     bool
-	LicenseName     string
-	LicenseUsage    string
-	ReportData      bool
-	ReportName      string
-	ReportUsage     string
-	ConfigFileData  string
-	ConfigFileName  string
-	ConfigFileUsage string
+	HelpData               bool
+	HelpName               string
+	HelpUsage              string
+	VersionData            bool
+	VersionName            string
+	VersionUsage           string
+	LicenseData            bool
+	LicenseName            string
+	LicenseUsage           string
+	ReportData             bool
+	ReportName             string
+	ReportUsage            string
+	ConfigFileData         string
+	ConfigFileName         string
+	ConfigFileUsage        string
+	NotAutoReloadData      bool
+	NotAutoReloadName      string
+	NotAutoReloadShortName string
+	NotAutoReloadUsage     string
 
 	Usage string
 }
@@ -45,22 +49,26 @@ func initData() {
 		flagSet:    false,
 		flagParser: false,
 
-		HelpData:        false,
-		HelpName:        "help",
-		HelpUsage:       fmt.Sprintf("Show usage of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		VersionData:     false,
-		VersionName:     "version",
-		VersionUsage:    fmt.Sprintf("Show version of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		LicenseData:     false,
-		LicenseName:     "license",
-		LicenseUsage:    fmt.Sprintf("Show license of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		ReportData:      false,
-		ReportName:      "report",
-		ReportUsage:     fmt.Sprintf("Show how to report questions/errors of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
-		ConfigFileData:  "config.yaml",
-		ConfigFileName:  "config",
-		ConfigFileUsage: fmt.Sprintf("%s", "The location of the running configuration file of the backend service. The option is a string, the default value is config.yaml in the running directory."),
-		Usage:           "",
+		HelpData:               false,
+		HelpName:               "help",
+		HelpUsage:              fmt.Sprintf("Show usage of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		VersionData:            false,
+		VersionName:            "version",
+		VersionUsage:           fmt.Sprintf("Show version of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		LicenseData:            false,
+		LicenseName:            "license",
+		LicenseUsage:           fmt.Sprintf("Show license of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		ReportData:             false,
+		ReportName:             "report",
+		ReportUsage:            fmt.Sprintf("Show how to report questions/errors of %s. If this option is set, the backend service will not run.", utils.GetArgs0Name()),
+		ConfigFileData:         "config.yaml",
+		ConfigFileName:         "config",
+		ConfigFileUsage:        fmt.Sprintf("%s", "The location of the running configuration file of the backend service. The option is a string, the default value is config.yaml in the running directory."),
+		NotAutoReloadData:      false,
+		NotAutoReloadName:      "not-auto-reload",
+		NotAutoReloadShortName: "",
+		NotAutoReloadUsage:     fmt.Sprintf("%s", "Disable automatic detection of configuration file changes and reloading of system programs. This feature is enabled by default. This feature consumes a certain amount of performance. If your performance is not enough, you can choose to disable it."),
+		Usage:                  "",
 	}
 
 	data.ready()
@@ -90,50 +98,114 @@ func (d *flagData) writeUsage() {
 		}
 
 		option := field.Name[:len(field.Name)-4]
-		optionName, ok := val.FieldByName(option + "Name").Interface().(string)
-		if !ok {
-			panic("can not get option name")
+		optionName := ""
+		optionShortName := ""
+		optionUsage := ""
+
+		if utils.HasFieldByReflect(typ, option+"Name") {
+			var ok bool
+			optionName, ok = val.FieldByName(option + "Name").Interface().(string)
+			if !ok {
+				panic("can not get option name")
+			}
 		}
 
-		optionUsage, ok := val.FieldByName(option + "Usage").Interface().(string)
-		if !ok {
-			panic("can not get option Usage")
+		if utils.HasFieldByReflect(typ, option+"ShortName") {
+			var ok bool
+			optionShortName, ok = val.FieldByName(option + "ShortName").Interface().(string)
+			if !ok {
+				panic("can not get option short name")
+			}
+		} else if len(optionName) > 1 {
+			optionShortName = optionName[:1]
+		}
+
+		if utils.HasFieldByReflect(typ, option+"Usage") {
+			var ok bool
+			optionUsage, ok = val.FieldByName(option + "Usage").Interface().(string)
+			if !ok {
+				panic("can not get option usage")
+			}
 		}
 
 		var title string
+		var title1 string
+		var title2 string
 		if field.Type.Kind() == reflect.Bool {
-			optionData, ok := val.FieldByName(option + "Data").Interface().(bool)
-			if !ok {
-				panic("can not get option data")
+			var optionData bool
+			if utils.HasFieldByReflect(typ, option+"Data") {
+				var ok bool
+				optionData, ok = val.FieldByName(option + "Data").Interface().(bool)
+				if !ok {
+					panic("can not get option data")
+				}
 			}
 
 			if optionData == true {
 				panic("bool option can not be true")
 			}
 
-			title1 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(optionName, utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title2 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(optionName[0:1], utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title = fmt.Sprintf("%s\n%s", title1, title2)
+			if optionName != "" {
+				title1 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(optionName, utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
+
+			if optionShortName != "" {
+				title2 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(optionShortName, utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
 		} else if field.Type.Kind() == reflect.String {
-			optionData, ok := val.FieldByName(option + "Data").Interface().(string)
-			if !ok {
-				panic("can not get option data")
+			var optionData string
+			if utils.HasFieldByReflect(typ, option+"Data") {
+				var ok bool
+				optionData, ok = val.FieldByName(option + "Data").Interface().(string)
+				if !ok {
+					panic("can not get option data")
+				}
 			}
 
-			title1 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string, default: '%s'", optionName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title2 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string, default: '%s'", optionName[0:1], optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title = fmt.Sprintf("%s\n%s", title1, title2)
+			if optionName != "" && optionData != "" {
+				title1 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string, default: '%s'", optionName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			} else if optionName != "" && optionData == "" {
+				title1 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string", optionName), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
+
+			if optionShortName != "" && optionData != "" {
+				title2 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string, default: '%s'", optionShortName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			} else if optionShortName != "" && optionData == "" {
+				title2 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s string", optionShortName), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
 		} else if field.Type.Kind() == reflect.Uint {
-			optionData, ok := val.FieldByName(option + "Data").Interface().(uint)
-			if !ok {
-				panic("can not get option data")
+			var optionData uint
+			if utils.HasFieldByReflect(typ, option+"Data") {
+				var ok bool
+				optionData, ok = val.FieldByName(option + "Data").Interface().(uint)
+				if !ok {
+					panic("can not get option data")
+				}
 			}
 
-			title1 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number, default: %d", optionName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title2 := fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number, default: %d", optionName[0:1], optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
-			title = fmt.Sprintf("%s\n%s", title1, title2)
+			if optionName != "" && optionData != 0 {
+				title1 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number, default: %d", optionName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			} else if optionName != "" && optionData == 0 {
+				title1 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number", optionName), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
+
+			if optionShortName != "" && optionData != 0 {
+				title2 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number, default: %d", optionShortName, optionData), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			} else if optionShortName != "" && optionData == 0 {
+				title2 = fmt.Sprintf("%s%s%s", OptionIdent, OptionPrefix, utils.FormatTextToWidth(fmt.Sprintf("%s number", optionShortName), utils.NormalConsoleWidth-len(OptionIdent)-len(OptionPrefix)))
+			}
 		} else {
 			panic("error flag type")
+		}
+
+		if title1 == "" && title2 == "" {
+			continue
+		} else if title1 != "" && title2 == "" {
+			title = title1
+		} else if title1 == "" {
+			title = title2
+		} else {
+			title = fmt.Sprintf("%s\n%s", title1, title2)
 		}
 
 		result.WriteString(title)

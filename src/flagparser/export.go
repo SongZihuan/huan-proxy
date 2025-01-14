@@ -98,6 +98,14 @@ func ConfigFile() string {
 	return data.ConfigFile()
 }
 
+func NotRunAutoReload() bool {
+	return data.NotAutoReloadData
+}
+
+func RunAutoReload() bool {
+	return !NotRunAutoReload()
+}
+
 func SetOutput(writer io.Writer) {
 	data.SetOutput(writer)
 }

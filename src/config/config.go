@@ -3,34 +3,57 @@ package config
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
+	"github.com/SongZihuan/huan-proxy/src/flagparser"
+	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/fsnotify/fsnotify"
 	"os"
+	"path/filepath"
 	"sync"
 )
 
 type ConfigStruct struct {
 	ConfigLock sync.Mutex
 
-	configReady   bool
-	yamlHasParser bool
-	sigchan       chan os.Signal
-	configPath    string
-	watcher       *fsnotify.Watcher
+	configReady    bool
+	yamlHasParser  bool
+	sigchan        chan os.Signal
+	configPath     string
+	configDir      string
+	configFileName string
+	watcher        *fsnotify.Watcher
 
 	Yaml  *YamlConfig
 	Rules *rulescompile.RuleListCompileConfig
 }
 
-func newConfig(configPath string) ConfigStruct {
-	return ConfigStruct{
-		// Lock不用初始化
-		configReady:   false,
-		yamlHasParser: false,
-		sigchan:       make(chan os.Signal),
-		configPath:    configPath,
-		Yaml:          nil,
-		Rules:         nil,
+func newConfig(configPath string) (*ConfigStruct, error) {
+	if configPath == "" {
+		if !flagparser.IsReady() {
+			panic("flag is not ready")
+		}
+
+		configPath = flagparser.ConfigFile()
 	}
+
+	configPath, err := utils.ClearFilePathAbs(configPath)
+	if err != nil {
+		return nil, err
+	}
+
+	configDir := filepath.Dir(configPath)
+	configFileName := filepath.Base(configPath)
+
+	return &ConfigStruct{
+		// Lock不用初始化
+		configReady:    false,
+		yamlHasParser:  false,
+		sigchan:        make(chan os.Signal),
+		configPath:     configPath,
+		configDir:      configDir,
+		configFileName: configFileName,
+		Yaml:           nil,
+		Rules:          nil,
+	}, nil
 }
 
 func (c *ConfigStruct) Init() (err configerr.ConfigError) {
@@ -72,26 +95,30 @@ func (c *ConfigStruct) Reload() (err configerr.ConfigError) {
 	}
 
 	bak := ConfigStruct{
-		configReady:   c.configReady,
-		yamlHasParser: c.yamlHasParser,
-		sigchan:       c.sigchan,
-		configPath:    c.configPath,
-		watcher:       c.watcher,
-		Yaml:          c.Yaml,
-		Rules:         c.Rules,
+		configReady:    c.configReady,
+		yamlHasParser:  c.yamlHasParser,
+		sigchan:        c.sigchan,
+		configPath:     c.configPath,
+		configDir:      c.configDir,
+		configFileName: c.configFileName,
+		watcher:        c.watcher,
+		Yaml:           c.Yaml,
+		Rules:          c.Rules,
 		// 新建类型
 	}
 
 	defer func() {
 		if err != nil {
 			*c = ConfigStruct{
-				configReady:   bak.configReady,
-				yamlHasParser: bak.yamlHasParser,
-				sigchan:       bak.sigchan,
-				configPath:    bak.configPath,
-				watcher:       c.watcher,
-				Yaml:          bak.Yaml,
-				Rules:         bak.Rules,
+				configReady:    bak.configReady,
+				yamlHasParser:  bak.yamlHasParser,
+				sigchan:        bak.sigchan,
+				configPath:     bak.configPath,
+				configDir:      bak.configDir,
+				configFileName: bak.configFileName,
+				watcher:        bak.watcher,
+				Yaml:           bak.Yaml,
+				Rules:          bak.Rules,
 				// 新建类型 Lock不需要复制
 			}
 		}
@@ -246,4 +273,31 @@ func (c *ConfigStruct) GetRulesList() *rulescompile.RuleListCompileConfig {
 	}
 
 	return c.Rules
+}
+
+func (c *ConfigStruct) GetConfigPathFile() string {
+	c.ConfigLock.Lock()
+	defer c.ConfigLock.Unlock()
+
+	// 不需要检查Ready
+
+	return c.configPath
+}
+
+func (c *ConfigStruct) GetConfigFileDir() string {
+	c.ConfigLock.Lock()
+	defer c.ConfigLock.Unlock()
+
+	// 不需要检查Ready
+
+	return c.configDir
+}
+
+func (c *ConfigStruct) GetConfigFileName() string {
+	c.ConfigLock.Lock()
+	defer c.ConfigLock.Unlock()
+
+	// 不需要检查Ready
+
+	return c.configFileName
 }
