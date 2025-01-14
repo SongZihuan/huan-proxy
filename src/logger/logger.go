@@ -59,7 +59,7 @@ func InitLogger(warnWriter, errWriter io.Writer) error {
 		panic("config is not ready")
 	}
 
-	level := LoggerLevel(config.Config().Yaml.GlobalConfig.LogLevel)
+	level := LoggerLevel(config.GetConfig().GlobalConfig.LogLevel)
 	logLevel, ok := levelMap[level]
 	if !ok {
 		return fmt.Errorf("invalid log level: %s", level)
@@ -76,7 +76,7 @@ func InitLogger(warnWriter, errWriter io.Writer) error {
 	logger := &Logger{
 		level:      level,
 		logLevel:   logLevel,
-		logTag:     config.Config().Yaml.LogTag.ToBool(true),
+		logTag:     config.GetConfig().LogTag.ToBool(true),
 		warnWriter: os.Stdout,
 		errWriter:  os.Stderr,
 		args0:      utils.GetArgs0(),

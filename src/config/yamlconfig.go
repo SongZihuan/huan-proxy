@@ -19,7 +19,7 @@ func (y *YamlConfig) Init() error {
 
 func (y *YamlConfig) SetDefault() {
 	y.GlobalConfig.SetDefault()
-	y.Http.SetDefault(&y.GlobalConfig)
+	y.Http.SetDefault()
 	y.RuleListConfig.SetDefault()
 }
 

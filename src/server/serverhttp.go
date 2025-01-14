@@ -9,7 +9,7 @@ func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.writeHuanProxyHeader(r)
 
 	func() {
-		for _, rule := range s.cfg.Rules.Rules {
+		for _, rule := range s.GetRulesList() {
 			if !s.matchURL(rule, r) {
 				continue
 			}

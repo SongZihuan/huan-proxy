@@ -38,7 +38,12 @@ func MainV1() int {
 		return utils.ExitByErrorMsg("config parser unknown error")
 	}
 
-	cfg := config.Config()
+	cfg := config.GetConfig()
+	err = config.NotifyConfigFile()
+	if err != nil {
+		return utils.ExitByError(err)
+	}
+	defer config.CloseNotifyConfigFile()
 
 	err = logger.InitLogger(os.Stdout, os.Stderr)
 	if err != nil {
@@ -50,7 +55,7 @@ func MainV1() int {
 	}
 
 	logger.Executable()
-	logger.Infof("run mode: %s", cfg.Yaml.GlobalConfig.GetRunMode())
+	logger.Infof("run mode: %s", cfg.GlobalConfig.GetRunMode())
 
 	ser := server.NewServer()
 
@@ -69,7 +74,7 @@ func MainV1() int {
 	}()
 
 	select {
-	case <-cfg.GetSignalChan():
+	case <-config.GetSignalChan():
 		break
 	case err := <-sererror:
 		return utils.ExitByError(err)

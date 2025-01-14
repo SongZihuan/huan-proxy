@@ -7,13 +7,13 @@ import (
 )
 
 type RuleDirCompileConfig struct {
-	BasePath      string
-	IndexFile     []*IndexFileCompileConfig
-	IgnoreFile    []*IgnoreFileCompileConfig
-	AddPrefixPath string
-	SubPrefixPath string
-	Rewrite       *rewritecompile.RewriteCompileConfig
-	Cors          *corscompile.CorsCompileConfig
+	BasePath   string
+	IndexFile  []*IndexFileCompileConfig
+	IgnoreFile []*IgnoreFileCompileConfig
+	AddPath    string
+	SubPath    string
+	Rewrite    *rewritecompile.RewriteCompileConfig
+	Cors       *corscompile.CorsCompileConfig
 }
 
 func NewRuleDirCompileConfig(r *dir.RuleDirConfig) (*RuleDirCompileConfig, error) {
@@ -46,13 +46,13 @@ func NewRuleDirCompileConfig(r *dir.RuleDirConfig) (*RuleDirCompileConfig, error
 	}
 
 	return &RuleDirCompileConfig{
-		BasePath:      r.BasePath,
-		IndexFile:     Index,
-		IgnoreFile:    Ignore,
-		AddPrefixPath: r.AddPrefixPath,
-		SubPrefixPath: r.SubPrefixPath,
-		Rewrite:       rewrite,
-		Cors:          cors,
+		BasePath:   r.BasePath,
+		IndexFile:  Index,
+		IgnoreFile: Ignore,
+		AddPath:    r.AddPath,
+		SubPath:    r.SubPath,
+		Rewrite:    rewrite,
+		Cors:       cors,
 	}, nil
 }
 

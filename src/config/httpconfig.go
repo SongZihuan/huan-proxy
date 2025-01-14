@@ -11,7 +11,7 @@ type HttpConfig struct {
 	StopWaitSecond int    `yaml:"stopwaitsecond"`
 }
 
-func (h *HttpConfig) SetDefault(global *GlobalConfig) {
+func (h *HttpConfig) SetDefault() {
 	if h.Address == "" {
 		h.Address = "localhost:2689"
 	}

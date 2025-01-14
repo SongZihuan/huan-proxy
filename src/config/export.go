@@ -2,16 +2,10 @@ package config
 
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
+	"os"
 )
-
-func newConfig(configPath string) ConfigStruct {
-	return ConfigStruct{
-		configReady:   false,
-		yamlHasParser: false,
-		configPath:    configPath,
-	}
-}
 
 func InitConfig(configPath string) configerr.ConfigError {
 	if !flagparser.IsReady() {
@@ -32,16 +26,27 @@ func InitConfig(configPath string) configerr.ConfigError {
 }
 
 func IsReady() bool {
-	return config.yamlHasParser && config.configReady
+	return config.IsReady()
 }
 
-func Config() *ConfigStruct {
-	if !IsReady() {
-		panic("config not ready")
-	}
+func GetConfig() *YamlConfig {
+	return config.GetConfig()
+}
 
-	tmp := config
-	return &tmp
+func GetRules() *rulescompile.RuleListCompileConfig {
+	return config.GetRulesList()
+}
+
+func GetSignalChan() chan os.Signal {
+	return config.GetSignalChan()
+}
+
+func NotifyConfigFile() error {
+	return config.NotifyConfigFile()
+}
+
+func CloseNotifyConfigFile() {
+	config.CloseNotifyConfigFile()
 }
 
 var config ConfigStruct

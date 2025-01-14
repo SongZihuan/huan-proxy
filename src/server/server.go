@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"net/http"
@@ -13,7 +14,6 @@ var ServerStop = fmt.Errorf("server stop")
 
 type HTTPServer struct {
 	address string
-	cfg     *config.ConfigStruct
 	skip    map[string]struct{}
 	isTerm  bool
 	writer  func(msg string)
@@ -27,12 +27,26 @@ func NewServer() *HTTPServer {
 	var skip = make(map[string]struct{}, 10)
 
 	return &HTTPServer{
-		address: config.Config().Yaml.Http.Address,
-		cfg:     config.Config(),
+		address: config.GetConfig().Http.Address,
 		skip:    skip,
 		isTerm:  logger.IsInfoTermNotDumb(),
 		writer:  logger.InfoWrite,
 	}
+}
+
+func (s *HTTPServer) GetConfig() *config.YamlConfig {
+	// 不用检查Ready，因为在NewServer的时候已经检查过了
+	return config.GetConfig()
+}
+
+func (s *HTTPServer) GetRules() *rulescompile.RuleListCompileConfig {
+	// 不用检查Ready，因为在NewServer的时候已经检查过了
+	return config.GetRules()
+}
+
+func (s *HTTPServer) GetRulesList() []*rulescompile.RuleCompileConfig {
+	// 不用检查Ready，因为在NewServer的时候已经检查过了
+	return s.GetRules().Rules
 }
 
 func (s *HTTPServer) Run() error {

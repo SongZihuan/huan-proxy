@@ -10,22 +10,22 @@ import (
 )
 
 type RuleAPIConfig struct {
-	Address       string                `yaml:"address"`
-	AddPrefixPath string                `yaml:"addpath"`
-	SubPrefixPath string                `yaml:"subpath"`
-	Rewrite       rewrite.RewriteConfig `yaml:"rewrite"`
-	HeaderSet     []*HeaderConfig       `yaml:"headerset"`
-	HeaderAdd     []*HeaderConfig       `yaml:"headeradd"`
-	HeaderDel     []*HeaderDelConfig    `yaml:"headerdel"`
-	QuerySet      []*QueryConfig        `yaml:"queryset"`
-	QueryAdd      []*QueryConfig        `yaml:"queryadd"`
-	QueryDel      []*QueryDelConfig     `yaml:"querydel"`
-	Via           string                `yaml:"via"`
+	Address   string                `yaml:"address"`
+	AddPath   string                `yaml:"addpath"`
+	SubPath   string                `yaml:"subpath"`
+	Rewrite   rewrite.RewriteConfig `yaml:"rewrite"`
+	HeaderSet []*HeaderConfig       `yaml:"headerset"`
+	HeaderAdd []*HeaderConfig       `yaml:"headeradd"`
+	HeaderDel []*HeaderDelConfig    `yaml:"headerdel"`
+	QuerySet  []*QueryConfig        `yaml:"queryset"`
+	QueryAdd  []*QueryConfig        `yaml:"queryadd"`
+	QueryDel  []*QueryDelConfig     `yaml:"querydel"`
+	Via       string                `yaml:"via"`
 }
 
 func (r *RuleAPIConfig) SetDefault() {
-	r.AddPrefixPath = utils.ProcessURLPath(r.AddPrefixPath)
-	r.SubPrefixPath = utils.ProcessURLPath(r.SubPrefixPath)
+	r.AddPath = utils.ProcessURLPath(r.AddPath)
+	r.SubPath = utils.ProcessURLPath(r.SubPath)
 
 	r.Rewrite.SetDefault()
 

@@ -31,14 +31,14 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 
 	url := utils.ProcessURLPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {
-		fileAccess = s.dirRewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+		fileAccess = s.dirRewrite("", rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
 		filePath = path.Join(dirBasePath, fileAccess)
 	} else {
 		if url == rule.MatchPath {
-			fileAccess = s.dirRewrite("", rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+			fileAccess = s.dirRewrite("", rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else if strings.HasPrefix(url, rule.MatchPath+"/") {
-			fileAccess = s.dirRewrite(url[len(rule.MatchPath+"/"):], rule.Dir.AddPrefixPath, rule.Dir.SubPrefixPath, rule.Dir.Rewrite)
+			fileAccess = s.dirRewrite(url[len(rule.MatchPath+"/"):], rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else {
 			s.abortNotFound(w)

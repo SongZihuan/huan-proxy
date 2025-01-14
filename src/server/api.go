@@ -23,7 +23,7 @@ func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 
 	s.processProxyHeader(r)
 
-	r.URL.Path = s.apiRewrite(utils.ProcessURLPath(r.URL.Path), rule.Api.AddPrefixPath, rule.Api.SubPrefixPath, rule.Api.Rewrite)
+	r.URL.Path = s.apiRewrite(utils.ProcessURLPath(r.URL.Path), rule.Api.AddPath, rule.Api.SubPath, rule.Api.Rewrite)
 
 	for _, h := range rule.Api.HeaderSet {
 		r.Header.Set(h.Header, h.Value)

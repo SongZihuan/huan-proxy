@@ -7,13 +7,13 @@ import (
 )
 
 type RuleDirConfig struct {
-	BasePath      string                `yaml:"basepath"`
-	IndexFile     []*IndexFileConfig    `yaml:"indexfile"`
-	IgnoreFile    []*IgnoreFileConfig   `yaml:"ignorefile"`
-	AddPrefixPath string                `yaml:"addpath"`
-	SubPrefixPath string                `yaml:"subpath"`
-	Rewrite       rewrite.RewriteConfig `yaml:"rewrite"`
-	Cors          cors.CorsConfig       `yaml:"cors"`
+	BasePath   string                `yaml:"basepath"`
+	IndexFile  []*IndexFileConfig    `yaml:"indexfile"`
+	IgnoreFile []*IgnoreFileConfig   `yaml:"ignorefile"`
+	AddPath    string                `yaml:"addpath"`
+	SubPath    string                `yaml:"subpath"`
+	Rewrite    rewrite.RewriteConfig `yaml:"rewrite"`
+	Cors       cors.CorsConfig       `yaml:"cors"`
 }
 
 func (r *RuleDirConfig) SetDefault() {

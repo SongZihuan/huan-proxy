@@ -11,19 +11,19 @@ const XHuanProxyHeaer = api.XHuanProxyHeaer
 const ViaHeader = api.ViaHeader
 
 type RuleAPICompileConfig struct {
-	Address       string
-	TargetURL     *url.URL
-	Server        *httputil.ReverseProxy
-	AddPrefixPath string
-	SubPrefixPath string
-	Rewrite       *rewritecompile.RewriteCompileConfig
-	HeaderSet     []*HeaderCompileConfig
-	HeaderAdd     []*HeaderCompileConfig
-	HeaderDel     []*HeaderDelCompileConfig
-	QuerySet      []*QueryCompileConfig
-	QueryAdd      []*QueryCompileConfig
-	QueryDel      []*QueryDelCompileConfig
-	Via           string
+	Address   string
+	TargetURL *url.URL
+	Server    *httputil.ReverseProxy
+	AddPath   string
+	SubPath   string
+	Rewrite   *rewritecompile.RewriteCompileConfig
+	HeaderSet []*HeaderCompileConfig
+	HeaderAdd []*HeaderCompileConfig
+	HeaderDel []*HeaderDelCompileConfig
+	QuerySet  []*QueryCompileConfig
+	QueryAdd  []*QueryCompileConfig
+	QueryDel  []*QueryDelCompileConfig
+	Via       string
 }
 
 func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error) {
@@ -94,17 +94,17 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 	}
 
 	return &RuleAPICompileConfig{
-		Address:       r.Address,
-		TargetURL:     targetURL,
-		Server:        server,
-		AddPrefixPath: r.AddPrefixPath,
-		SubPrefixPath: r.SubPrefixPath,
-		Rewrite:       rewrite,
-		HeaderSet:     HeaderSet,
-		HeaderAdd:     HeaderAdd,
-		HeaderDel:     HeaderDel,
-		QuerySet:      QuerySet,
-		QueryAdd:      QueryAdd,
-		Via:           r.Via,
+		Address:   r.Address,
+		TargetURL: targetURL,
+		Server:    server,
+		AddPath:   r.AddPath,
+		SubPath:   r.SubPath,
+		Rewrite:   rewrite,
+		HeaderSet: HeaderSet,
+		HeaderAdd: HeaderAdd,
+		HeaderDel: HeaderDel,
+		QuerySet:  QuerySet,
+		QueryAdd:  QueryAdd,
+		Via:       r.Via,
 	}, nil
 }
