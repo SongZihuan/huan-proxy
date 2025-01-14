@@ -33,7 +33,15 @@ func WatcherConfigFile() error {
 
 	// Start listening for events.
 	go func() {
-		defer closeNotifyConfigFile()
+		defer func() {
+			err := closeNotifyConfigFile()
+			if err != nil {
+				logger.Warnf("Auto reload stop with error: %s", err.Error())
+				return
+			}
+
+			logger.Warnf("Auto reload stop.")
+		}()
 
 	OutSideCycle:
 		for {
@@ -78,14 +86,15 @@ func WatcherConfigFile() error {
 }
 
 func CloseNotifyConfigFile() {
-	closeNotifyConfigFile()
+	_ = closeNotifyConfigFile()
 }
 
-func closeNotifyConfigFile() {
+func closeNotifyConfigFile() error {
 	if watcher == nil {
-		return
+		return nil
 	}
 
-	_ = watcher.Close()
+	err := watcher.Close()
 	watcher = nil
+	return err
 }

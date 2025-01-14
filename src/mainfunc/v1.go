@@ -55,11 +55,6 @@ func MainV1() int {
 		}
 		defer configwatcher.CloseNotifyConfigFile()
 
-		err = logger.InitLogger(os.Stdout, os.Stderr)
-		if err != nil {
-			return utils.ExitByError(err)
-		}
-
 		logger.Infof("Auto reload enable.")
 	} else {
 		logger.Infof("Auto reload disable.")
