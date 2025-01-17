@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (s *HTTPServer) cors(corsRule *corscompile.CorsCompileConfig, w http.ResponseWriter, r *http.Request) bool {
+func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, w http.ResponseWriter, r *http.Request) bool {
 	if corsRule.Ignore {
 		if r.Method == http.MethodOptions {
 			s.abortMethodNotAllowed(w)

@@ -8,7 +8,7 @@ import (
 	"net/url"
 )
 
-func (s *HTTPServer) redirectServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HuanProxyServer) redirectServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
 	target := s.redirectRewrite(rule.Redirect.Address, rule.Redirect.Rewrite)
 
 	if _, err := url.Parse(target); err != nil {
@@ -20,7 +20,7 @@ func (s *HTTPServer) redirectServer(rule *rulescompile.RuleCompileConfig, w http
 	s.statusRedirect(w, r, target, rule.Redirect.Code)
 }
 
-func (s *HTTPServer) redirectRewrite(address string, rewrite *rewritecompile.RewriteCompileConfig) string {
+func (s *HuanProxyServer) redirectRewrite(address string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	if rewrite.Use && rewrite.Regex != nil {
 		rewrite.Regex.ReplaceAllString(address, rewrite.Target)
 	}

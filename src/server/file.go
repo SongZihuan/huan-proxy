@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func (s *HTTPServer) fileServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HuanProxyServer) fileServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
 	if !s.cors(rule.File.Cors, w, r) {
 		return
 	}

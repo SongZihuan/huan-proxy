@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HuanProxyServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
 	proxy := rule.Api.Server
 	if proxy == nil {
 		s.abortServerError(w)
@@ -57,7 +57,7 @@ func (s *HTTPServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 	proxy.ServeHTTP(w, r) // 反向代理
 }
 
-func (s *HTTPServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
+func (s *HuanProxyServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	srcpath = utils.ProcessURLPath(srcpath)
 	prefix = utils.ProcessURLPath(prefix)
 	suffix = utils.ProcessURLPath(suffix)
@@ -75,7 +75,7 @@ func (s *HTTPServer) apiRewrite(srcpath string, prefix string, suffix string, re
 	return srcpath
 }
 
-func (s *HTTPServer) processProxyHeader(r *http.Request) {
+func (s *HuanProxyServer) processProxyHeader(r *http.Request) {
 	if r.RemoteAddr == "" {
 		return
 	}
@@ -124,7 +124,7 @@ func (s *HTTPServer) processProxyHeader(r *http.Request) {
 	r.Header.Set("X-Forwarded-Proto", proto)
 }
 
-func (s *HTTPServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
+func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
 	ForwardedList := strings.Split(r.Header.Get("Forwarded"), ",")
 	ProxyList := make([]string, 0, len(ForwardedList)+1)
 	NewForwardedList := make([]string, 0, len(ForwardedList)+1)
@@ -168,7 +168,7 @@ func (s *HTTPServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]
 	return ProxyList, NewForwardedList, host, proto
 }
 
-func (s *HTTPServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
+func (s *HuanProxyServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
 	XFroWardedForList := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
 	ProxyList := make([]string, 0, len(XFroWardedForList)+1)
 	NewForwardedList := make([]string, 0, len(XFroWardedForList)+1)

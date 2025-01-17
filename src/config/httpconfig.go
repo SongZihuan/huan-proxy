@@ -13,7 +13,7 @@ type HttpConfig struct {
 
 func (h *HttpConfig) SetDefault() {
 	if h.Address == "" {
-		h.Address = "localhost:2689"
+		return
 	}
 
 	if h.StopWaitSecond <= 0 {
@@ -22,6 +22,10 @@ func (h *HttpConfig) SetDefault() {
 }
 
 func (h *HttpConfig) Check() configerr.ConfigError {
+	if h.Address == "" {
+		return nil
+	}
+
 	if _, err := url.Parse(h.Address); err != nil {
 		return configerr.NewConfigError(fmt.Sprintf("http address error: %s", err.Error()))
 	}

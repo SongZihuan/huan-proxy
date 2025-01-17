@@ -13,7 +13,7 @@ import (
 const XHuanProxyHeaer = apicompile.XHuanProxyHeaer
 const ViaHeader = apicompile.ViaHeader
 
-func (s *HTTPServer) writeHuanProxyHeader(r *http.Request) {
+func (s *HuanProxyServer) writeHuanProxyHeader(r *http.Request) {
 	version := strings.TrimSpace(utils.StringToOnlyPrint(resource.Version))
 	h := r.Header.Get(XHuanProxyHeaer)
 	if h == "" {
@@ -25,7 +25,7 @@ func (s *HTTPServer) writeHuanProxyHeader(r *http.Request) {
 	r.Header.Set(XHuanProxyHeaer, h)
 }
 
-func (s *HTTPServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, r *http.Request) {
+func (s *HuanProxyServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, r *http.Request) {
 	info := fmt.Sprintf("%s %s", r.Proto, rule.Api.Via)
 
 	h := r.Header.Get(ViaHeader)
@@ -38,34 +38,34 @@ func (s *HTTPServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, r *htt
 	r.Header.Set(ViaHeader, h)
 }
 
-func (s *HTTPServer) abortForbidden(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortForbidden(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusForbidden)
 }
 
-func (s *HTTPServer) abortNotFound(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortNotFound(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotFound)
 }
 
-func (s *HTTPServer) abortNotAcceptable(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortNotAcceptable(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNotAcceptable)
 }
 
-func (s *HTTPServer) abortMethodNotAllowed(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortMethodNotAllowed(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
-func (s *HTTPServer) abortServerError(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortServerError(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusInternalServerError)
 }
 
-func (s *HTTPServer) abortNoContent(w http.ResponseWriter) {
+func (s *HuanProxyServer) abortNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (s *HTTPServer) statusOK(w http.ResponseWriter) {
+func (s *HuanProxyServer) statusOK(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (s *HTTPServer) statusRedirect(w http.ResponseWriter, r *http.Request, url string, code int) {
+func (s *HuanProxyServer) statusRedirect(w http.ResponseWriter, r *http.Request, url string, code int) {
 	http.Redirect(w, r, url, code)
 }

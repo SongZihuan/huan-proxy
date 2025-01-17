@@ -2,6 +2,7 @@ package mainfunc
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/config/configwatcher"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
@@ -63,18 +64,28 @@ func MainV1() int {
 	logger.Executablef("%s", "ready")
 	logger.Infof("run mode: %s", config.GetConfig().GlobalConfig.GetRunMode())
 
-	ser := server.NewServer()
+	ser := server.NewHuanProxyServer()
 
+	httpschan := make(chan error)
 	httpchan := make(chan error)
 
-	go func() {
-		httpchan <- ser.RunHttp()
-	}()
+	err = ser.Run(httpschan, httpchan)
+	if err != nil {
+		return utils.ExitByErrorMsg(fmt.Sprintf("run http/https error: %s", err.Error()))
+	}
 
 	select {
 	case <-config.GetSignalChan():
 		return 0
 	case err := <-httpchan:
+		if errors.Is(err, server.ServerStop) {
+			return 0
+		} else if err != nil {
+			return utils.ExitByError(err)
+		} else {
+			return 0
+		}
+	case err := <-httpschan:
 		if errors.Is(err, server.ServerStop) {
 			return 0
 		} else if err != nil {

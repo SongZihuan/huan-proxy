@@ -110,7 +110,7 @@ func (p *LogFormatterParams) ResetColor() string {
 	return reset
 }
 
-func (s *HTTPServer) Formatter(param LogFormatterParams) string {
+func (s *HuanProxyServer) Formatter(param LogFormatterParams) string {
 	var statusColor, methodColor, resetColor string
 	if s.isTerm {
 		statusColor = param.StatusCodeColor()
@@ -131,7 +131,7 @@ func (s *HTTPServer) Formatter(param LogFormatterParams) string {
 	)
 }
 
-func (s *HTTPServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Start timer
 	start := time.Now()
 	path := r.URL.Path

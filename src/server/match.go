@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (s *HTTPServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Request) bool {
+func (s *HuanProxyServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Request) bool {
 	url := utils.ProcessURLPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {
 		if rule.MatchRegex.MatchString(url) || rule.MatchRegex.MatchString(url+"/") {

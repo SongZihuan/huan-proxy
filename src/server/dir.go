@@ -15,7 +15,7 @@ import (
 const IndexMaxDeep = 5
 const DefaultIgnoreFileMap = 20
 
-func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
+func (s *HuanProxyServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
 	if !s.cors(rule.Dir.Cors, w, r) {
 		return
 	}
@@ -94,7 +94,7 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 	s.statusOK(w)
 }
 
-func (s *HTTPServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
+func (s *HuanProxyServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	if strings.HasPrefix(srcpath, suffix) {
 		srcpath = srcpath[len(suffix):]
 	}
@@ -108,11 +108,11 @@ func (s *HTTPServer) dirRewrite(srcpath string, prefix string, suffix string, re
 	return srcpath
 }
 
-func (s *HTTPServer) getIndexFile(rule *rulescompile.RuleCompileConfig, dir string) string {
+func (s *HuanProxyServer) getIndexFile(rule *rulescompile.RuleCompileConfig, dir string) string {
 	return s._getIndexFile(rule, dir, "", IndexMaxDeep)
 }
 
-func (s *HTTPServer) _getIndexFile(rule *rulescompile.RuleCompileConfig, baseDir string, nextDir string, deep int) string {
+func (s *HuanProxyServer) _getIndexFile(rule *rulescompile.RuleCompileConfig, baseDir string, nextDir string, deep int) string {
 	if deep == 0 {
 		return ""
 	}

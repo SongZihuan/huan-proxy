@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (s *HuanProxyServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.writeHuanProxyHeader(r)
 
 	func() {

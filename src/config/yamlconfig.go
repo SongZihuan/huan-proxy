@@ -9,7 +9,8 @@ import (
 
 type YamlConfig struct {
 	GlobalConfig         `yaml:",inline"`
-	Http                 HttpConfig `yaml:"http"`
+	Http                 HttpConfig  `yaml:"http"`
+	Https                HttpsConfig `yaml:"https"`
 	rules.RuleListConfig `yaml:",inline"`
 }
 

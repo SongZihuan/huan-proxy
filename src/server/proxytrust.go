@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (s *HTTPServer) checkProxyTrust(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) bool {
+func (s *HuanProxyServer) checkProxyTrust(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) bool {
 	if !rule.UseTrustedIPs {
 		return true
 	}
