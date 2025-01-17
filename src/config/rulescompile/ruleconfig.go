@@ -6,26 +6,30 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/apicompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/dircompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/filecompile"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/redirectcompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/remotetrustcompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/matchcompile"
 )
 
 const (
-	RulesProxyTypeFile = rules.ProxyTypeFile
-	RulesProxyTypeDir  = rules.ProxyTypeDir
-	RulesProxyTypeAPI  = rules.ProxyTypeAPI
+	RulesProxyTypeFile     = rules.ProxyTypeFile
+	RulesProxyTypeDir      = rules.ProxyTypeDir
+	RulesProxyTypeAPI      = rules.ProxyTypeAPI
+	RulesProxyTypeRedirect = rules.ProxyTypeRedirect
 )
 
 const (
 	ProxyTypeFile = iota
 	ProxyTypeDir
 	ProxyTypeAPI
+	ProxyTypeRedirect
 )
 
 var ProxyTypeMap = map[string]int{
-	RulesProxyTypeFile: ProxyTypeFile,
-	RulesProxyTypeDir:  ProxyTypeDir,
-	RulesProxyTypeAPI:  ProxyTypeAPI,
+	RulesProxyTypeFile:     ProxyTypeFile,
+	RulesProxyTypeDir:      ProxyTypeDir,
+	RulesProxyTypeAPI:      ProxyTypeAPI,
+	RulesProxyTypeRedirect: ProxyTypeRedirect,
 }
 
 type RuleCompileConfig struct {
@@ -34,9 +38,10 @@ type RuleCompileConfig struct {
 	*matchcompile.MatchCompileConfig
 	*remotetrustcompile.RemoteTrustCompileConfig
 
-	File *filecompile.RuleFileCompileConfig
-	Dir  *dircompile.RuleDirCompileConfig
-	Api  *apicompile.RuleAPICompileConfig
+	File     *filecompile.RuleFileCompileConfig
+	Dir      *dircompile.RuleDirCompileConfig
+	Api      *apicompile.RuleAPICompileConfig
+	Redirect *redirectcompile.RuleRedirectCompileConfig
 }
 
 func NewRuleCompileConfig(r *rules.RuleConfig) (*RuleCompileConfig, error) {
@@ -90,6 +95,18 @@ func NewRuleCompileConfig(r *rules.RuleConfig) (*RuleCompileConfig, error) {
 			MatchCompileConfig:       match,
 			RemoteTrustCompileConfig: remoteTrusts,
 			Api:                      api,
+		}, nil
+	} else if typeID == ProxyTypeRedirect {
+		redirect, err := redirectcompile.NewRuleAPICompileConfig(&r.Redirect)
+		if err != nil {
+			return nil, err
+		}
+
+		return &RuleCompileConfig{
+			Type:                     typeID,
+			MatchCompileConfig:       match,
+			RemoteTrustCompileConfig: remoteTrusts,
+			Redirect:                 redirect,
 		}, nil
 	} else {
 		return nil, fmt.Errorf("error rule type")

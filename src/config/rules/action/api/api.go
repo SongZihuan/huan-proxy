@@ -61,7 +61,7 @@ func (r *RuleAPIConfig) SetDefault() {
 func (r *RuleAPIConfig) Check() configerr.ConfigError {
 	targetURL, err := url.Parse(r.Address)
 	if err != nil {
-		return configerr.NewConfigError(fmt.Sprintf("Failed to parse target URL: %v", err))
+		return configerr.NewConfigError(fmt.Sprintf("Failed to parse target URL: %s", err.Error()))
 	}
 
 	if targetURL.Opaque != "" {

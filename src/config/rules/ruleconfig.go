@@ -5,14 +5,16 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/api"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/dir"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/file"
+	"github.com/SongZihuan/huan-proxy/src/config/rules/action/redirect"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/remotetrust"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/match"
 )
 
 const (
-	ProxyTypeFile = "file"
-	ProxyTypeDir  = "dir"
-	ProxyTypeAPI  = "api"
+	ProxyTypeFile     = "file"
+	ProxyTypeDir      = "dir"
+	ProxyTypeAPI      = "api"
+	ProxyTypeRedirect = "redirect"
 )
 
 type RuleConfig struct {
@@ -21,9 +23,10 @@ type RuleConfig struct {
 	match.MatchConfig             `yaml:",inline"`
 	remotetrust.RemoteTrustConfig `yaml:",inline"`
 
-	File file.RuleFileConfig `yaml:"file"`
-	Dir  dir.RuleDirConfig   `yaml:"dir"`
-	Api  api.RuleAPIConfig   `yaml:"api"`
+	File     file.RuleFileConfig         `yaml:"file"`
+	Dir      dir.RuleDirConfig           `yaml:"dir"`
+	Api      api.RuleAPIConfig           `yaml:"api"`
+	Redirect redirect.RuleRedirectConfig `yaml:"redirect"`
 }
 
 func (p *RuleConfig) SetDefault() {
@@ -36,6 +39,8 @@ func (p *RuleConfig) SetDefault() {
 		p.Dir.SetDefault()
 	} else if p.Type == ProxyTypeAPI {
 		p.Api.SetDefault()
+	} else if p.Type == ProxyTypeRedirect {
+		p.Redirect.SetDefault()
 	}
 }
 
@@ -62,6 +67,11 @@ func (p *RuleConfig) Check() configerr.ConfigError {
 		}
 	} else if p.Type == ProxyTypeAPI {
 		err := p.Api.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	} else if p.Type == ProxyTypeRedirect {
+		err := p.Redirect.Check()
 		if err != nil && err.IsError() {
 			return err
 		}

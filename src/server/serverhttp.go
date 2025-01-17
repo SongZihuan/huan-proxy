@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"net/http"
 )
@@ -18,6 +19,8 @@ func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			fmt.Printf("rule.Type: %d\n", rule.Type)
+
 			if rule.Type == rulescompile.ProxyTypeFile {
 				s.fileServer(rule, w, r)
 				return
@@ -26,6 +29,9 @@ func (s *HTTPServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
 				return
 			} else if rule.Type == rulescompile.ProxyTypeAPI {
 				s.apiServer(rule, w, r)
+				return
+			} else if rule.Type == rulescompile.ProxyTypeRedirect {
+				s.redirectServer(rule, w, r)
 				return
 			} else {
 				s.abortServerError(w)

@@ -65,27 +65,23 @@ func MainV1() int {
 
 	ser := server.NewServer()
 
-	serstop := make(chan bool)
-	sererror := make(chan error)
+	httpchan := make(chan error)
 
 	go func() {
-		err := ser.Run()
-		if errors.Is(err, server.ServerStop) {
-			serstop <- true
-		} else if err != nil {
-			sererror <- err
-		} else {
-			serstop <- false
-		}
+		httpchan <- ser.RunHttp()
 	}()
 
 	select {
 	case <-config.GetSignalChan():
-		break
-	case err := <-sererror:
-		return utils.ExitByError(err)
-	case <-serstop:
-		break
+		return 0
+	case err := <-httpchan:
+		if errors.Is(err, server.ServerStop) {
+			return 0
+		} else if err != nil {
+			return utils.ExitByError(err)
+		} else {
+			return 0
+		}
 	}
 
 	return 0

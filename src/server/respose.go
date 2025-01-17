@@ -65,3 +65,7 @@ func (s *HTTPServer) abortNoContent(w http.ResponseWriter) {
 func (s *HTTPServer) statusOK(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
 }
+
+func (s *HTTPServer) statusRedirect(w http.ResponseWriter, r *http.Request, url string, code int) {
+	http.Redirect(w, r, url, code)
+}

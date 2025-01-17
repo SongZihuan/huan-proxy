@@ -49,8 +49,8 @@ func (s *HTTPServer) GetRulesList() []*rulescompile.RuleCompileConfig {
 	return s.GetRules().Rules
 }
 
-func (s *HTTPServer) Run() error {
-	err := s.run()
+func (s *HTTPServer) RunHttp() error {
+	err := s.runHttp()
 	if errors.Is(err, http.ErrServerClosed) {
 		return ServerStop
 	} else if err != nil {
@@ -60,7 +60,7 @@ func (s *HTTPServer) Run() error {
 	return nil
 }
 
-func (s *HTTPServer) run() error {
+func (s *HTTPServer) runHttp() error {
 	logger.Infof("start server in %s", s.address)
 	return http.ListenAndServe(s.address, s)
 }
