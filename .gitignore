@@ -9,5 +9,6 @@ cert
 .DS_Store
 
 testdata
+remote-testdata
 
 pkg
