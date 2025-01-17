@@ -94,6 +94,4 @@ func MainV1() int {
 			return 0
 		}
 	}
-
-	return 0
 }

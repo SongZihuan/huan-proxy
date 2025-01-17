@@ -175,7 +175,7 @@ func (s *HTTPSServer) runHttps(_httpschan chan error) chan error {
 		}()
 	ListenCycle:
 		for {
-			logger.Infof("start server in %s", s.cfg.Address)
+			logger.Infof("start https server in %s", s.cfg.Address)
 			err := s.server.ListenAndServeTLS("", "")
 			if err != nil && errors.Is(err, http.ErrServerClosed) {
 				if s.reloadMutex.TryLock() {
@@ -251,7 +251,7 @@ func (s *HTTPServer) loadHttp() error {
 
 func (s *HTTPServer) runHttp(_httpschan chan error) chan error {
 	go func(httpschan chan error) {
-		logger.Infof("start server in %s", s.cfg.Address)
+		logger.Infof("start http server in %s", s.cfg.Address)
 		err := s.server.ListenAndServe()
 		if err != nil && errors.Is(err, http.ErrServerClosed) {
 			httpschan <- ServerStop
