@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ClearFilePathAbs(pathstr string) (string, error) {
+func CleanFilePathAbs(pathstr string) (string, error) {
 	pathstr, err := filepath.Abs(filepath.Clean(pathstr))
 	if err != nil {
 		return "", err
@@ -23,15 +23,43 @@ func ClearFilePathAbs(pathstr string) (string, error) {
 }
 
 func FilePathEqual(path1, path2 string) bool {
-	path1, err := ClearFilePathAbs(path1)
+	path1, err := CleanFilePathAbs(path1)
 	if err != nil {
 		return false
 	}
 
-	path2, err = ClearFilePathAbs(path2)
+	path2, err = CleanFilePathAbs(path2)
 	if err != nil {
 		return false
 	}
 
 	return path1 == path2
+}
+
+func CheckIfSubPath(parentPath, childPath string) bool {
+	parentPath, err := CleanFilePathAbs(parentPath)
+	if err != nil {
+		return false
+	}
+
+	childPath, err = CleanFilePathAbs(childPath)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasPrefix(childPath, parentPath)
+}
+
+func CheckIfSubPathNotEqaule(parentPath, childPath string) bool {
+	parentPath, err := CleanFilePathAbs(parentPath)
+	if err != nil {
+		return false
+	}
+
+	childPath, err = CleanFilePathAbs(childPath)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasPrefix(childPath, parentPath) && childPath != parentPath
 }

@@ -67,6 +67,11 @@ func (s *HTTPServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.Resp
 		}
 	}
 
+	if !utils.CheckIfSubPath(dirBasePath, filePath) {
+		s.abortForbidden(w)
+		return
+	}
+
 	file, err := os.ReadFile(filePath)
 	if err != nil {
 		s.abortNotFound(w)

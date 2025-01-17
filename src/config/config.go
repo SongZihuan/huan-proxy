@@ -35,7 +35,7 @@ func newConfig(configPath string) (*ConfigStruct, error) {
 		configPath = flagparser.ConfigFile()
 	}
 
-	configPath, err := utils.ClearFilePathAbs(configPath)
+	configPath, err := utils.CleanFilePathAbs(configPath)
 	if err != nil {
 		return nil, err
 	}
