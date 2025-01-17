@@ -53,7 +53,7 @@ func (s *HuanProxyServer) apiServer(rule *rulescompile.RuleCompileConfig, w http
 
 	r.URL.RawQuery = query.Encode()
 
-	s.writeViaHeader(rule, r)
+	s.writeViaHeader(rule, w, r)
 	proxy.ServeHTTP(w, r) // 反向代理
 }
 

@@ -2,8 +2,6 @@ module github.com/SongZihuan/huan-proxy
 
 go 1.22.0
 
-toolchain go1.23.2
-
 require (
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gabriel-vasile/mimetype v1.4.7

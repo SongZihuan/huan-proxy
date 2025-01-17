@@ -13,53 +13,30 @@ import (
 const XHuanProxyHeaer = apicompile.XHuanProxyHeaer
 const ViaHeader = apicompile.ViaHeader
 
-func (s *HuanProxyServer) writeHuanProxyHeader(r *http.Request) {
+func (s *HuanProxyServer) writeHuanProxyHeader(w http.ResponseWriter, r *http.Request) {
 	version := strings.TrimSpace(utils.StringToOnlyPrint(resource.Version))
-	h := r.Header.Get(XHuanProxyHeaer)
-	if h == "" {
-		h = version
-	} else {
-		h = fmt.Sprintf("%s, %s", h, version)
-	}
-
-	r.Header.Set(XHuanProxyHeaer, h)
+	r.Header.Set(XHuanProxyHeaer, version)
+	w.Header().Set(XHuanProxyHeaer, version)
 }
 
-func (s *HuanProxyServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, r *http.Request) {
+func (s *HuanProxyServer) writeViaHeader(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
 	info := fmt.Sprintf("%s %s", r.Proto, rule.Api.Via)
 
-	h := r.Header.Get(ViaHeader)
-	if h == "" {
-		h = info
+	reqHeader := r.Header.Get(ViaHeader)
+	if reqHeader == "" {
+		reqHeader = info
 	} else {
-		h = fmt.Sprintf("%s, %s", h, info)
+		reqHeader = fmt.Sprintf("%s, %s", reqHeader, info)
 	}
+	r.Header.Set(ViaHeader, reqHeader)
 
-	r.Header.Set(ViaHeader, h)
-}
-
-func (s *HuanProxyServer) abortForbidden(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusForbidden)
-}
-
-func (s *HuanProxyServer) abortNotFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
-}
-
-func (s *HuanProxyServer) abortNotAcceptable(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotAcceptable)
-}
-
-func (s *HuanProxyServer) abortMethodNotAllowed(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-}
-
-func (s *HuanProxyServer) abortServerError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
-}
-
-func (s *HuanProxyServer) abortNoContent(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNoContent)
+	respHeader := w.Header().Get(ViaHeader)
+	if respHeader == "" {
+		respHeader = info
+	} else if !strings.Contains(respHeader, info) {
+		respHeader = fmt.Sprintf("%s, %s", respHeader, info)
+	}
+	w.Header().Set(ViaHeader, respHeader)
 }
 
 func (s *HuanProxyServer) statusOK(w http.ResponseWriter) {

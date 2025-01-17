@@ -7,7 +7,7 @@ import (
 )
 
 func (s *HuanProxyServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.writeHuanProxyHeader(r)
+	s.writeHuanProxyHeader(w, r)
 
 	func() {
 		for _, rule := range s.GetRulesList() {

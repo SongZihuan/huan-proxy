@@ -29,6 +29,7 @@ type GlobalConfig struct {
 	Mode     string           `yaml:"mode"`
 	LogLevel string           `yaml:"loglevel"`
 	LogTag   utils.StringBool `yaml:"logtag"`
+	NotAbort utils.StringBool `yaml:"notabort"`
 }
 
 func (g *GlobalConfig) SetDefault() {
@@ -53,6 +54,8 @@ func (g *GlobalConfig) SetDefault() {
 	} else {
 		g.LogTag.SetDefaultDisable()
 	}
+
+	g.NotAbort.SetDefaultDisable()
 
 	return
 }
