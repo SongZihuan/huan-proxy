@@ -6,30 +6,30 @@ import (
 	"net/http"
 )
 
-func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, w http.ResponseWriter, r *http.Request) bool {
+func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *Context) bool {
 	if corsRule.Ignore {
-		if r.Method == http.MethodOptions {
-			s.abortMethodNotAllowed(w)
+		if ctx.Request.Method == http.MethodOptions {
+			s.abortMethodNotAllowed(ctx)
 			return false
 		} else {
 			return true
 		}
 	}
 
-	origin := r.Header.Get("Origin")
+	origin := ctx.Request.Header.Get("Origin")
 	if origin == "" {
-		s.abortForbidden(w)
+		s.abortForbidden(ctx)
 		return false
 	}
 
 	if !corsRule.InOriginList(origin) {
-		s.abortForbidden(w)
+		s.abortForbidden(ctx)
 		return false
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", origin)
-	w.Header().Set("Access-Control-Allow-Methods", "GET,OPTIONS")
-	w.Header().Set("Access-Control-Max-Age", fmt.Sprintf("%d", corsRule.MaxAgeSec))
+	ctx.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+	ctx.Writer.Header().Set("Access-Control-Allow-Methods", "GET,OPTIONS")
+	ctx.Writer.Header().Set("Access-Control-Max-Age", fmt.Sprintf("%d", corsRule.MaxAgeSec))
 
 	return true
 }

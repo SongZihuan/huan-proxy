@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"net/http"
 )
@@ -15,14 +14,14 @@ func (s *HuanProxyServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request
 				continue
 			}
 
-			if !s.checkProxyTrust(rule, w, r) {
+			ctx := NewContext(rule, w, r)
+
+			if !s.checkProxyTrust(ctx) {
 				return
 			}
 
-			fmt.Printf("rule.Type: %d\n", rule.Type)
-
 			if rule.Type == rulescompile.ProxyTypeFile {
-				s.fileServer(rule, w, r)
+				s.fileServer(ctx)
 				return
 			} else if rule.Type == rulescompile.ProxyTypeDir {
 				s.dirServer(rule, w, r)

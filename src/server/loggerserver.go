@@ -154,8 +154,8 @@ func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Reque
 
 	param.RemoteAddr = r.RemoteAddr
 	param.Method = r.Method
-	param.StatusCode = w.Status
-	param.BodySize = w.Size
+	param.StatusCode = w.status
+	param.BodySize = w.Size()
 
 	if raw != "" {
 		path = path + "?" + raw

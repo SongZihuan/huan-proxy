@@ -2,26 +2,35 @@ package server
 
 import "net/http"
 
-func (s *HuanProxyServer) abortForbidden(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusForbidden)
+func (s *HuanProxyServer) abort(ctx *Context, code int) {
+	if ctx.Abort {
+		return
+	}
+
+	ctx.Writer.WriteHeader(code)
+	ctx.Abort = true
 }
 
-func (s *HuanProxyServer) abortNotFound(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotFound)
+func (s *HuanProxyServer) abortForbidden(ctx *Context) {
+	s.abort(ctx, http.StatusForbidden)
 }
 
-func (s *HuanProxyServer) abortNotAcceptable(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNotAcceptable)
+func (s *HuanProxyServer) abortNotFound(ctx *Context) {
+	s.abort(ctx, http.StatusNotFound)
 }
 
-func (s *HuanProxyServer) abortMethodNotAllowed(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
+func (s *HuanProxyServer) abortNotAcceptable(ctx *Context) {
+	s.abort(ctx, http.StatusNotAcceptable)
 }
 
-func (s *HuanProxyServer) abortServerError(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusInternalServerError)
+func (s *HuanProxyServer) abortMethodNotAllowed(ctx *Context) {
+	s.abort(ctx, http.StatusMethodNotAllowed)
 }
 
-func (s *HuanProxyServer) abortNoContent(w http.ResponseWriter) {
-	w.WriteHeader(http.StatusNoContent)
+func (s *HuanProxyServer) abortServerError(ctx *Context) {
+	s.abort(ctx, http.StatusInternalServerError)
+}
+
+func (s *HuanProxyServer) abortNoContent(ctx *Context) {
+	s.abort(ctx, http.StatusNoContent)
 }

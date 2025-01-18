@@ -1,41 +1,40 @@
 package server
 
 import (
-	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/gabriel-vasile/mimetype"
 	"net/http"
 	"os"
 )
 
-func (s *HuanProxyServer) fileServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
-	if !s.cors(rule.File.Cors, w, r) {
+func (s *HuanProxyServer) fileServer(ctx *Context) {
+	if !s.cors(ctx.Rule.File.Cors, ctx) {
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		s.abortMethodNotAllowed(w)
+		s.abortMethodNotAllowed(ctx)
 		return
 	}
 
-	file, err := os.ReadFile(rule.File.Path)
+	file, err := os.ReadFile(ctx.Rule.File.Path)
 	if err != nil {
-		s.abortServerError(w)
+		s.abortServerError(ctx)
 		return
 	}
 
 	mimeType := mimetype.Detect(file)
 	accept := r.Header.Get("Accept")
 	if !utils.AcceptMimeType(accept, mimeType.String()) {
-		s.abortNotAcceptable(w)
+		s.abortNotAcceptable(ctx)
 		return
 	}
 
-	_, err = w.Write(file)
+	_, err = ctx.Writer.Write(file)
 	if err != nil {
-		s.abortServerError(w)
+		s.abortServerError(ctx)
 		return
 	}
-	w.Header().Set("Content-Type", mimeType.String())
-	s.statusOK(w)
+	ctx.Writer.Header().Set("Content-Type", mimeType.String())
+	s.statusOK(ctx)
 }
