@@ -8,7 +8,7 @@ import (
 
 func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *Context) bool {
 	if corsRule.Ignore {
-		if ctx.Request.Method == http.MethodOptions {
+		if ctx.Request.Method() == http.MethodOptions {
 			s.abortMethodNotAllowed(ctx)
 			return false
 		} else {
@@ -16,7 +16,7 @@ func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *Con
 		}
 	}
 
-	origin := ctx.Request.Header.Get("Origin")
+	origin := ctx.Request.Header().Get("Origin")
 	if origin == "" {
 		s.abortForbidden(ctx)
 		return false

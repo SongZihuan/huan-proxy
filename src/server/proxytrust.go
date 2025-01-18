@@ -10,20 +10,20 @@ func (s *HuanProxyServer) checkProxyTrust(ctx *Context) bool {
 		return true
 	}
 
-	if ctx.Request.RemoteAddr == "" {
-		s.abortForbidden(w)
+	if ctx.Request.RemoteAddr() == "" {
+		s.abortForbidden(ctx)
 		return false
 	}
 
-	remoteIPStr, _, err := net.SplitHostPort(ctx.Request.RemoteAddr)
+	remoteIPStr, _, err := net.SplitHostPort(ctx.Request.RemoteAddr())
 	if err != nil {
-		s.abortForbidden(w)
+		s.abortForbidden(ctx)
 		return false
 	}
 
 	remoteIP := net.ParseIP(remoteIPStr)
 	if remoteIP == nil {
-		s.abortForbidden(w)
+		s.abortForbidden(ctx)
 		return false
 	}
 
@@ -45,6 +45,6 @@ func (s *HuanProxyServer) checkProxyTrust(ctx *Context) bool {
 		}
 	}
 
-	s.abortForbidden(w)
+	s.abortForbidden(ctx)
 	return false
 }

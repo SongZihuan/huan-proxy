@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"net/url"
+	"strings"
+)
 
 /*
 设计理念：
@@ -58,4 +61,13 @@ func validOptionalPort(port string) bool {
 		}
 	}
 	return true
+}
+
+func URLClone(old *url.URL) *url.URL {
+	reqURL := *old
+	if old.User != nil {
+		reqUser := *old.User
+		reqURL.User = &reqUser
+	}
+	return &reqURL
 }

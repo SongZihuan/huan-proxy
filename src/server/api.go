@@ -2,59 +2,64 @@ package server
 
 import (
 	"fmt"
-	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/rewritecompile"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
-	"net/http"
 	"strings"
 )
 
-func (s *HuanProxyServer) apiServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
-	proxy := rule.Api.Server
+func (s *HuanProxyServer) apiServer(ctx *Context) {
+	proxy := ctx.Rule.Api.Server
 	if proxy == nil {
-		s.abortServerError(w)
+		s.abortServerError(ctx)
 		return
 	}
 
-	targetURL := rule.Api.TargetURL
-	r.URL.Scheme = targetURL.Scheme
-	r.URL.Host = targetURL.Host
+	targetURL := ctx.Rule.Api.TargetURL
+	ctx.ProxyRequest.URL.Scheme = targetURL.Scheme
+	ctx.ProxyRequest.URL.Host = targetURL.Host
 
-	s.processProxyHeader(r)
+	s.processProxyHeader(ctx)
 
-	r.URL.Path = s.apiRewrite(utils.ProcessURLPath(r.URL.Path), rule.Api.AddPath, rule.Api.SubPath, rule.Api.Rewrite)
+	ctx.ProxyRequest.URL.Path = s.apiRewrite(utils.ProcessURLPath(ctx.ProxyRequest.URL.Path), ctx.Rule.Api.AddPath, ctx.Rule.Api.SubPath, ctx.Rule.Api.Rewrite)
 
-	for _, h := range rule.Api.HeaderSet {
-		r.Header.Set(h.Header, h.Value)
+	for _, h := range ctx.Rule.Api.HeaderSet {
+		ctx.ProxyRequest.Header.Set(h.Header, h.Value)
 	}
 
-	for _, h := range rule.Api.HeaderAdd {
-		r.Header.Add(h.Header, h.Value)
+	for _, h := range ctx.Rule.Api.HeaderAdd {
+		ctx.ProxyRequest.Header.Add(h.Header, h.Value)
 	}
 
-	for _, h := range rule.Api.HeaderDel {
-		r.Header.Del(h.Header)
+	for _, h := range ctx.Rule.Api.HeaderDel {
+		ctx.ProxyRequest.Header.Del(h.Header)
 	}
 
-	query := r.URL.Query()
+	query := ctx.ProxyRequest.URL.Query()
 
-	for _, q := range rule.Api.QuerySet {
+	for _, q := range ctx.Rule.Api.QuerySet {
 		query.Set(q.Query, q.Value)
 	}
 
-	for _, q := range rule.Api.QueryAdd {
+	for _, q := range ctx.Rule.Api.QueryAdd {
 		query.Add(q.Query, q.Value)
 	}
 
-	for _, q := range rule.Api.QueryDel {
+	for _, q := range ctx.Rule.Api.QueryDel {
 		query.Del(q.Query)
 	}
 
-	r.URL.RawQuery = query.Encode()
+	ctx.ProxyRequest.URL.RawQuery = query.Encode()
 
-	s.writeViaHeader(rule, w, r)
-	proxy.ServeHTTP(w, r) // 反向代理
+	s.writeViaHeader(ctx)
+
+	req, err := ctx.ProxyWriteToHttpRRequest()
+	if err != nil {
+		s.abortServerError(ctx)
+		return
+	}
+
+	proxy.ServeHTTP(ctx.Writer, req) // 反向代理
 }
 
 func (s *HuanProxyServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
@@ -75,12 +80,12 @@ func (s *HuanProxyServer) apiRewrite(srcpath string, prefix string, suffix strin
 	return srcpath
 }
 
-func (s *HuanProxyServer) processProxyHeader(r *http.Request) {
-	if r.RemoteAddr == "" {
+func (s *HuanProxyServer) processProxyHeader(ctx *Context) {
+	if ctx.Request.RemoteAddr() == "" {
 		return
 	}
 
-	remoteIPStr, _, err := net.SplitHostPort(r.RemoteAddr)
+	remoteIPStr, _, err := net.SplitHostPort(ctx.Request.RemoteAddr())
 	if err != nil {
 		return
 	}
@@ -90,24 +95,25 @@ func (s *HuanProxyServer) processProxyHeader(r *http.Request) {
 	var ProxyList, ForwardedList []string
 	var host, proto string
 
-	if r.Header.Get("Forwarded") != "" {
-		ProxyList, ForwardedList, host, proto = s.getProxyListForwarder(remoteIP, r)
-	} else if r.Header.Get("X-Forwarded-For") != "" {
-		ProxyList, ForwardedList, host, proto = s.getProxyListFromXForwardedFor(remoteIP, r)
+	if ctx.Request.Header().Get("Forwarded") != "" {
+		ProxyList, ForwardedList, host, proto = s.getProxyListForwarder(remoteIP, ctx.Request)
+	} else if ctx.Request.Header().Get("X-Forwarded-For") != "" {
+		ProxyList, ForwardedList, host, proto = s.getProxyListFromXForwardedFor(remoteIP, ctx.Request)
 	} else {
-		host = r.Header.Get("X-Forwarded-Host")
-		proto = r.Header.Get("X-Forwarded-Proto")
+		host = ctx.Request.Header().Get("X-Forwarded-Host")
+		proto = ctx.Request.Header().Get("X-Forwarded-Proto")
 
 		if host == "" {
-			host = r.Host
+			host = ctx.Request.Host()
 		}
 
 		host, _ = utils.SplitHostPort(host) // 去除host中的端口号
 
-		if proto == "" {
-			proto = "http"
-			if r.TLS != nil {
+		if proto == "http" || proto == "https" {
+			if ctx.Request.IsTLS() {
 				proto = "https"
+			} else {
+				proto = "http"
 			}
 		}
 
@@ -118,20 +124,20 @@ func (s *HuanProxyServer) processProxyHeader(r *http.Request) {
 			fmt.Sprintf("proto=%s", proto))
 	}
 
-	r.Header.Set("Forwarded", strings.Join(ForwardedList, ", "))
-	r.Header.Set("X-Forwarded-For", strings.Join(ProxyList, ", "))
-	r.Header.Set("X-Forwarded-Host", host)
-	r.Header.Set("X-Forwarded-Proto", proto)
+	ctx.ProxyRequest.Header.Set("Forwarded", strings.Join(ForwardedList, ", "))
+	ctx.ProxyRequest.Header.Set("X-Forwarded-For", strings.Join(ProxyList, ", "))
+	ctx.ProxyRequest.Header.Set("X-Forwarded-Host", host)
+	ctx.ProxyRequest.Header.Set("X-Forwarded-Proto", proto)
 }
 
-func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
-	ForwardedList := strings.Split(r.Header.Get("Forwarded"), ",")
+func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *ReadOnlyRequest) ([]string, []string, string, string) {
+	ForwardedList := strings.Split(r.Header().Get("Forwarded"), ",")
 	ProxyList := make([]string, 0, len(ForwardedList)+1)
 	NewForwardedList := make([]string, 0, len(ForwardedList)+1)
 
-	host, _ := utils.SplitHostPort(r.Host) // 去除host中的端口号
+	host, _ := utils.SplitHostPort(r.Host()) // 去除host中的端口号
 	proto := "http"
-	if r.TLS != nil {
+	if r.IsTLS() {
 		proto = "https"
 	}
 
@@ -168,8 +174,8 @@ func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *http.Request
 	return ProxyList, NewForwardedList, host, proto
 }
 
-func (s *HuanProxyServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *http.Request) ([]string, []string, string, string) {
-	XFroWardedForList := strings.Split(r.Header.Get("X-Forwarded-For"), ",")
+func (s *HuanProxyServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *ReadOnlyRequest) ([]string, []string, string, string) {
+	XFroWardedForList := strings.Split(r.Header().Get("X-Forwarded-For"), ",")
 	ProxyList := make([]string, 0, len(XFroWardedForList)+1)
 	NewForwardedList := make([]string, 0, len(XFroWardedForList)+1)
 
@@ -180,19 +186,20 @@ func (s *HuanProxyServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *http
 		}
 	}
 
-	host := r.Header.Get("X-Forwarded-Host")
-	proto := r.Header.Get("X-Forwarded-Proto")
+	host := r.Header().Get("X-Forwarded-Host")
+	proto := r.Header().Get("X-Forwarded-Proto")
 
 	if host == "" {
-		host = r.Host
+		host = r.Host()
 	}
 
 	host, _ = utils.SplitHostPort(host) // 去除host中的端口号
 
-	if proto == "" {
-		proto = "http"
-		if r.TLS != nil {
+	if proto == "http" || proto == "https" {
+		if r.IsTLS() {
 			proto = "https"
+		} else {
+			proto = "http"
 		}
 	}
 

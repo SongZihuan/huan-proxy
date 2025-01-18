@@ -12,7 +12,7 @@ func (s *HuanProxyServer) fileServer(ctx *Context) {
 		return
 	}
 
-	if r.Method != http.MethodGet {
+	if ctx.Request.Method() != http.MethodGet {
 		s.abortMethodNotAllowed(ctx)
 		return
 	}
@@ -24,7 +24,7 @@ func (s *HuanProxyServer) fileServer(ctx *Context) {
 	}
 
 	mimeType := mimetype.Detect(file)
-	accept := r.Header.Get("Accept")
+	accept := ctx.Request.Header().Get("Accept")
 	if !utils.AcceptMimeType(accept, mimeType.String()) {
 		s.abortNotAcceptable(ctx)
 		return

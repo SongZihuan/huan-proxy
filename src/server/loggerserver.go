@@ -137,7 +137,11 @@ func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Reque
 	path := r.URL.Path
 	raw := r.URL.RawQuery
 
-	w := NewWriter(_w)
+	w, ok := NewResponseWriter(_w).(*ResponseWriter)
+	if !ok {
+		_w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	// Process request
 	next(w, r)
@@ -154,7 +158,7 @@ func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Reque
 
 	param.RemoteAddr = r.RemoteAddr
 	param.Method = r.Method
-	param.StatusCode = w.status
+	param.StatusCode = w.Status()
 	param.BodySize = w.Size()
 
 	if raw != "" {

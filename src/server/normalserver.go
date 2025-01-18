@@ -1,17 +1,17 @@
 package server
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"net/http"
 )
 
 func (s *HuanProxyServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.writeHuanProxyHeader(w, r)
-
 	func() {
+	RuleCycle:
 		for _, rule := range s.GetRulesList() {
 			if !s.matchURL(rule, r) {
-				continue
+				continue RuleCycle
 			}
 
 			ctx := NewContext(rule, w, r)
@@ -20,24 +20,29 @@ func (s *HuanProxyServer) NormalServeHTTP(w http.ResponseWriter, r *http.Request
 				return
 			}
 
+			s.writeHuanProxyHeader(ctx)
+
 			if rule.Type == rulescompile.ProxyTypeFile {
 				s.fileServer(ctx)
-				return
 			} else if rule.Type == rulescompile.ProxyTypeDir {
-				s.dirServer(rule, w, r)
-				return
+				s.dirServer(ctx)
 			} else if rule.Type == rulescompile.ProxyTypeAPI {
-				s.apiServer(rule, w, r)
-				return
+				s.apiServer(ctx)
 			} else if rule.Type == rulescompile.ProxyTypeRedirect {
-				s.redirectServer(rule, w, r)
-				return
+				s.redirectServer(ctx)
 			} else {
-				s.abortServerError(w)
-				return
+				s.abortServerError(ctx)
 			}
-		}
 
-		s.abortNotFound(w)
+			if config.GetConfig().NotAbort.IsEnable(false) {
+				_ = ctx.Reset()
+				continue RuleCycle
+			}
+
+			ctx.MustWriteToResponse()
+			return
+
+		}
+		s.defaultResponse(w)
 	}()
 }

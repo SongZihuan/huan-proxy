@@ -15,83 +15,83 @@ import (
 const IndexMaxDeep = 5
 const DefaultIgnoreFileMap = 20
 
-func (s *HuanProxyServer) dirServer(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) {
-	if !s.cors(rule.Dir.Cors, w, r) {
+func (s *HuanProxyServer) dirServer(ctx *Context) {
+	if !s.cors(ctx.Rule.Dir.Cors, ctx) {
 		return
 	}
 
-	if r.Method != http.MethodGet {
-		s.abortMethodNotAllowed(w)
+	if ctx.Request.Method() != http.MethodGet {
+		s.abortMethodNotAllowed(ctx)
 		return
 	}
 
-	dirBasePath := rule.Dir.BasePath // 根部目录
-	fileAccess := ""                 // 访问目录
-	filePath := ""                   // 根部目录+访问目录=实际目录
+	dirBasePath := ctx.Rule.Dir.BasePath // 根部目录
+	fileAccess := ""                     // 访问目录
+	filePath := ""                       // 根部目录+访问目录=实际目录
 
-	url := utils.ProcessURLPath(r.URL.Path)
-	if rule.MatchType == matchcompile.RegexMatch {
-		fileAccess = s.dirRewrite("", rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
+	url := utils.ProcessURLPath(ctx.Request.URL().Path)
+	if ctx.Rule.MatchType == matchcompile.RegexMatch {
+		fileAccess = s.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 		filePath = path.Join(dirBasePath, fileAccess)
 	} else {
-		if url == rule.MatchPath {
-			fileAccess = s.dirRewrite("", rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
+		if url == ctx.Rule.MatchPath {
+			fileAccess = s.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
-		} else if strings.HasPrefix(url, rule.MatchPath+"/") {
-			fileAccess = s.dirRewrite(url[len(rule.MatchPath+"/"):], rule.Dir.AddPath, rule.Dir.SubPath, rule.Dir.Rewrite)
+		} else if strings.HasPrefix(url, ctx.Rule.MatchPath+"/") {
+			fileAccess = s.dirRewrite(url[len(ctx.Rule.MatchPath+"/"):], ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else {
-			s.abortNotFound(w)
+			s.abortNotFound(ctx)
 			return
 		}
 	}
 
 	if filePath == "" {
-		s.abortNotFound(w) // 正常清空不会走到这个流程
+		s.abortNotFound(ctx) // 正常清空不会走到这个流程
 		return
 	}
 
 	if utils.IsFile(filePath) {
 		// 判断这个文件是否被ignore，因为ignore是从dirBasePath写起，也可以是完整路径，因此filePath和fileAccess都要判断
-		for _, ignore := range rule.Dir.IgnoreFile {
+		for _, ignore := range ctx.Rule.Dir.IgnoreFile {
 			if ignore.CheckName(fileAccess) || ignore.CheckName(filePath) {
-				s.abortNotFound(w)
+				s.abortNotFound(ctx)
 				return
 			}
 		}
 	} else {
-		filePath = s.getIndexFile(rule, filePath)
+		filePath = s.getIndexFile(ctx.Rule, filePath)
 		if filePath == "" || !utils.IsFile(filePath) {
-			s.abortNotFound(w)
+			s.abortNotFound(ctx)
 			return
 		}
 	}
 
 	if !utils.CheckIfSubPath(dirBasePath, filePath) {
-		s.abortForbidden(w)
+		s.abortForbidden(ctx)
 		return
 	}
 
 	file, err := os.ReadFile(filePath)
 	if err != nil {
-		s.abortNotFound(w)
+		s.abortNotFound(ctx)
 		return
 	}
 
 	mimeType := mimetype.Detect(file)
-	accept := r.Header.Get("Accept")
+	accept := ctx.Request.Header().Get("Accept")
 	if !utils.AcceptMimeType(accept, mimeType.String()) {
-		s.abortNotAcceptable(w)
+		s.abortNotAcceptable(ctx)
 		return
 	}
 
-	_, err = w.Write(file)
+	_, err = ctx.Writer.Write(file)
 	if err != nil {
-		s.abortServerError(w)
+		s.abortServerError(ctx)
 		return
 	}
-	w.Header().Set("Content-Type", mimeType.String())
-	s.statusOK(w)
+	ctx.Writer.Header().Set("Content-Type", mimeType.String())
+	s.statusOK(ctx)
 }
 
 func (s *HuanProxyServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {

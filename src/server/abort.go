@@ -7,8 +7,18 @@ func (s *HuanProxyServer) abort(ctx *Context, code int) {
 		return
 	}
 
-	ctx.Writer.WriteHeader(code)
 	ctx.Abort = true
+	w, ok := ctx.Writer.(*ResponseWriter)
+	if !ok {
+		return
+	}
+
+	err := w.Reset()
+	if err != nil {
+		ctx.Writer.WriteHeader(http.StatusInternalServerError)
+	} else {
+		ctx.Writer.WriteHeader(code)
+	}
 }
 
 func (s *HuanProxyServer) abortForbidden(ctx *Context) {
