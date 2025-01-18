@@ -30,11 +30,3 @@ func IsFile(path string) bool {
 
 	return !s.IsDir()
 }
-
-func MakeDir(path string) error {
-	if IsExists(path) && IsDir(path) {
-		return nil
-	}
-
-	return os.MkdirAll(path, os.ModePerm)
-}

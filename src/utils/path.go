@@ -50,7 +50,7 @@ func CheckIfSubPath(parentPath, childPath string) bool {
 	return strings.HasPrefix(childPath, parentPath)
 }
 
-func CheckIfSubPathNotEqaule(parentPath, childPath string) bool {
+func CheckIfSubPathNotEqual(parentPath, childPath string) bool {
 	parentPath, err := CleanFilePathAbs(parentPath)
 	if err != nil {
 		return false

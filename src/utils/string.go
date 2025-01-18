@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"database/sql"
 	"regexp"
 	"strings"
 	"unicode"
@@ -30,13 +29,6 @@ func IsValidEmail(email string) bool {
 	pattern := `^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`
 	matched, _ := regexp.MatchString(pattern, email)
 	return matched
-}
-
-func GetSQLNullString(s sql.NullString) string {
-	if s.Valid {
-		return s.String
-	}
-	return ""
 }
 
 const NormalConsoleWidth = 80
