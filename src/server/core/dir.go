@@ -1,9 +1,10 @@
-package server
+package core
 
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/rewritecompile"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/matchcompile"
+	"github.com/SongZihuan/huan-proxy/src/server/context"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/gabriel-vasile/mimetype"
 	"net/http"
@@ -15,13 +16,13 @@ import (
 const IndexMaxDeep = 5
 const DefaultIgnoreFileMap = 20
 
-func (s *HuanProxyServer) dirServer(ctx *Context) {
-	if !s.cors(ctx.Rule.Dir.Cors, ctx) {
+func (c *CoreServer) dirServer(ctx *context.Context) {
+	if !c.cors(ctx.Rule.Dir.Cors, ctx) {
 		return
 	}
 
 	if ctx.Request.Method() != http.MethodGet {
-		s.abortMethodNotAllowed(ctx)
+		c.abortMethodNotAllowed(ctx)
 		return
 	}
 
@@ -31,23 +32,23 @@ func (s *HuanProxyServer) dirServer(ctx *Context) {
 
 	url := utils.ProcessURLPath(ctx.Request.URL().Path)
 	if ctx.Rule.MatchType == matchcompile.RegexMatch {
-		fileAccess = s.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
+		fileAccess = c.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 		filePath = path.Join(dirBasePath, fileAccess)
 	} else {
 		if url == ctx.Rule.MatchPath {
-			fileAccess = s.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
+			fileAccess = c.dirRewrite("", ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else if strings.HasPrefix(url, ctx.Rule.MatchPath+"/") {
-			fileAccess = s.dirRewrite(url[len(ctx.Rule.MatchPath+"/"):], ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
+			fileAccess = c.dirRewrite(url[len(ctx.Rule.MatchPath+"/"):], ctx.Rule.Dir.AddPath, ctx.Rule.Dir.SubPath, ctx.Rule.Dir.Rewrite)
 			filePath = path.Join(dirBasePath, fileAccess)
 		} else {
-			s.abortNotFound(ctx)
+			c.abortNotFound(ctx)
 			return
 		}
 	}
 
 	if filePath == "" {
-		s.abortNotFound(ctx) // 正常清空不会走到这个流程
+		c.abortNotFound(ctx) // 正常清空不会走到这个流程
 		return
 	}
 
@@ -55,46 +56,46 @@ func (s *HuanProxyServer) dirServer(ctx *Context) {
 		// 判断这个文件是否被ignore，因为ignore是从dirBasePath写起，也可以是完整路径，因此filePath和fileAccess都要判断
 		for _, ignore := range ctx.Rule.Dir.IgnoreFile {
 			if ignore.CheckName(fileAccess) || ignore.CheckName(filePath) {
-				s.abortNotFound(ctx)
+				c.abortNotFound(ctx)
 				return
 			}
 		}
 	} else {
-		filePath = s.getIndexFile(ctx.Rule, filePath)
+		filePath = c.getIndexFile(ctx.Rule, filePath)
 		if filePath == "" || !utils.IsFile(filePath) {
-			s.abortNotFound(ctx)
+			c.abortNotFound(ctx)
 			return
 		}
 	}
 
 	if !utils.CheckIfSubPath(dirBasePath, filePath) {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return
 	}
 
 	file, err := os.ReadFile(filePath)
 	if err != nil {
-		s.abortNotFound(ctx)
+		c.abortNotFound(ctx)
 		return
 	}
 
 	mimeType := mimetype.Detect(file)
 	accept := ctx.Request.Header().Get("Accept")
 	if !utils.AcceptMimeType(accept, mimeType.String()) {
-		s.abortNotAcceptable(ctx)
+		c.abortNotAcceptable(ctx)
 		return
 	}
 
 	_, err = ctx.Writer.Write(file)
 	if err != nil {
-		s.abortServerError(ctx)
+		c.abortServerError(ctx)
 		return
 	}
 	ctx.Writer.Header().Set("Content-Type", mimeType.String())
-	s.statusOK(ctx)
+	c.statusOK(ctx)
 }
 
-func (s *HuanProxyServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
+func (c *CoreServer) dirRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	if strings.HasPrefix(srcpath, suffix) {
 		srcpath = srcpath[len(suffix):]
 	}
@@ -108,11 +109,11 @@ func (s *HuanProxyServer) dirRewrite(srcpath string, prefix string, suffix strin
 	return srcpath
 }
 
-func (s *HuanProxyServer) getIndexFile(rule *rulescompile.RuleCompileConfig, dir string) string {
-	return s._getIndexFile(rule, dir, "", IndexMaxDeep)
+func (c *CoreServer) getIndexFile(rule *rulescompile.RuleCompileConfig, dir string) string {
+	return c._getIndexFile(rule, dir, "", IndexMaxDeep)
 }
 
-func (s *HuanProxyServer) _getIndexFile(rule *rulescompile.RuleCompileConfig, baseDir string, nextDir string, deep int) string {
+func (c *CoreServer) _getIndexFile(rule *rulescompile.RuleCompileConfig, baseDir string, nextDir string, deep int) string {
 	if deep == 0 {
 		return ""
 	}
@@ -170,7 +171,7 @@ func (s *HuanProxyServer) _getIndexFile(rule *rulescompile.RuleCompileConfig, ba
 	if indexFile != nil {
 		return path.Join(dir, indexFile.Name())
 	} else if indexDir != nil {
-		return s._getIndexFile(rule, dir, indexDir.Name(), deep-1)
+		return c._getIndexFile(rule, dir, indexDir.Name(), deep-1)
 	} else {
 		return ""
 	}

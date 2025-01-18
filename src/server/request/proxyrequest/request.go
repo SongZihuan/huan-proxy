@@ -1,4 +1,4 @@
-package server
+package proxyrequest
 
 import (
 	"github.com/SongZihuan/huan-proxy/src/utils"

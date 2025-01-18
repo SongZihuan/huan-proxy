@@ -2,10 +2,13 @@
 // Use of this source code is governed by a MIT style
 // license that can be found in the LICENSE.gin file.
 
-package server
+package loggerserver
 
 import (
+	"errors"
 	"fmt"
+	"github.com/SongZihuan/huan-proxy/src/logger"
+	"github.com/SongZihuan/huan-proxy/src/server/responsewriter"
 	"io"
 	"net/http"
 	"time"
@@ -21,6 +24,20 @@ const (
 	cyan    = "\033[97;46m"
 	reset   = "\033[0m"
 )
+
+type LogServer struct {
+	skip      map[string]struct{}
+	isTerm    bool
+	logWriter func(msg string)
+}
+
+func NewLogServer() *LogServer {
+	return &LogServer{
+		skip:      make(map[string]struct{}, 10),
+		isTerm:    logger.IsInfoTermNotDumb(),
+		logWriter: logger.InfoWrite,
+	}
+}
 
 // LoggerConfig defines the config for Logger middleware.
 type LoggerConfig struct {
@@ -110,9 +127,9 @@ func (p *LogFormatterParams) ResetColor() string {
 	return reset
 }
 
-func (s *HuanProxyServer) Formatter(param LogFormatterParams) string {
+func (ls *LogServer) Formatter(param LogFormatterParams) string {
 	var statusColor, methodColor, resetColor string
-	if s.isTerm {
+	if ls.isTerm {
 		statusColor = param.StatusCodeColor()
 		methodColor = param.MethodColor()
 		resetColor = param.ResetColor()
@@ -131,24 +148,28 @@ func (s *HuanProxyServer) Formatter(param LogFormatterParams) string {
 	)
 }
 
-func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func (ls *LogServer) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	// Start timer
+	serverErr := false // 若为true则为server error（http.StatusInternalServerError）
 	start := time.Now()
 	path := r.URL.Path
 	raw := r.URL.RawQuery
 
-	w, ok := NewResponseWriter(_w).(*ResponseWriter)
-	if !ok {
-		_w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
+	writer := responsewriter.NewResponseWriter(w)
 
 	// Process request
-	next(w, r)
+	next(writer, r)
+
+	err := writer.WriteToResponse()
+	if err != nil && !errors.Is(err, responsewriter.ErrHasWriter) {
+		serverErr = true
+		writer.ServerError()
+		// 请求发生服务器故障，日志服务继续
+	}
 
 	param := LogFormatterParams{
 		Request: r,
-		isTerm:  s.isTerm,
+		isTerm:  ls.isTerm,
 		Keys:    make(map[string]any),
 	}
 
@@ -158,8 +179,13 @@ func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Reque
 
 	param.RemoteAddr = r.RemoteAddr
 	param.Method = r.Method
-	param.StatusCode = w.Status()
-	param.BodySize = w.Size()
+	if serverErr {
+		param.StatusCode = http.StatusInternalServerError
+		param.BodySize = 0
+	} else {
+		param.StatusCode = writer.Status()
+		param.BodySize = writer.Size()
+	}
 
 	if raw != "" {
 		path = path + "?" + raw
@@ -167,7 +193,7 @@ func (s *HuanProxyServer) LoggerServerHTTP(_w http.ResponseWriter, r *http.Reque
 
 	param.Path = path
 
-	if s.writer != nil {
-		s.writer(s.Formatter(param))
+	if ls.logWriter != nil {
+		ls.logWriter(ls.Formatter(param))
 	}
 }

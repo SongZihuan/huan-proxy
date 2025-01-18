@@ -8,6 +8,8 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"github.com/SongZihuan/huan-proxy/src/server"
+	"github.com/SongZihuan/huan-proxy/src/server/httpserver"
+	"github.com/SongZihuan/huan-proxy/src/server/httpsserver"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"os"
 )
@@ -78,7 +80,7 @@ func MainV1() int {
 	case <-config.GetSignalChan():
 		return 0
 	case err := <-httpchan:
-		if errors.Is(err, server.ServerStop) {
+		if errors.Is(err, httpserver.ServerStop) {
 			return 0
 		} else if err != nil {
 			return utils.ExitByError(err)
@@ -86,7 +88,7 @@ func MainV1() int {
 			return 0
 		}
 	case err := <-httpschan:
-		if errors.Is(err, server.ServerStop) {
+		if errors.Is(err, httpsserver.ServerStop) {
 			return 0
 		} else if err != nil {
 			return utils.ExitByError(err)

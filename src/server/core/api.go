@@ -1,17 +1,19 @@
-package server
+package core
 
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/rewritecompile"
+	"github.com/SongZihuan/huan-proxy/src/server/context"
+	"github.com/SongZihuan/huan-proxy/src/server/request/readonlyrequest"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 	"strings"
 )
 
-func (s *HuanProxyServer) apiServer(ctx *Context) {
+func (c *CoreServer) apiServer(ctx *context.Context) {
 	proxy := ctx.Rule.Api.Server
 	if proxy == nil {
-		s.abortServerError(ctx)
+		c.abortServerError(ctx)
 		return
 	}
 
@@ -19,9 +21,9 @@ func (s *HuanProxyServer) apiServer(ctx *Context) {
 	ctx.ProxyRequest.URL.Scheme = targetURL.Scheme
 	ctx.ProxyRequest.URL.Host = targetURL.Host
 
-	s.processProxyHeader(ctx)
+	c.processProxyHeader(ctx)
 
-	ctx.ProxyRequest.URL.Path = s.apiRewrite(utils.ProcessURLPath(ctx.ProxyRequest.URL.Path), ctx.Rule.Api.AddPath, ctx.Rule.Api.SubPath, ctx.Rule.Api.Rewrite)
+	ctx.ProxyRequest.URL.Path = c.apiRewrite(utils.ProcessURLPath(ctx.ProxyRequest.URL.Path), ctx.Rule.Api.AddPath, ctx.Rule.Api.SubPath, ctx.Rule.Api.Rewrite)
 
 	for _, h := range ctx.Rule.Api.HeaderSet {
 		ctx.ProxyRequest.Header.Set(h.Header, h.Value)
@@ -51,18 +53,18 @@ func (s *HuanProxyServer) apiServer(ctx *Context) {
 
 	ctx.ProxyRequest.URL.RawQuery = query.Encode()
 
-	s.writeViaHeader(ctx)
+	c.writeViaHeader(ctx)
 
 	req, err := ctx.ProxyWriteToHttpRRequest()
 	if err != nil {
-		s.abortServerError(ctx)
+		c.abortServerError(ctx)
 		return
 	}
 
 	proxy.ServeHTTP(ctx.Writer, req) // 反向代理
 }
 
-func (s *HuanProxyServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
+func (c *CoreServer) apiRewrite(srcpath string, prefix string, suffix string, rewrite *rewritecompile.RewriteCompileConfig) string {
 	srcpath = utils.ProcessURLPath(srcpath)
 	prefix = utils.ProcessURLPath(prefix)
 	suffix = utils.ProcessURLPath(suffix)
@@ -80,7 +82,7 @@ func (s *HuanProxyServer) apiRewrite(srcpath string, prefix string, suffix strin
 	return srcpath
 }
 
-func (s *HuanProxyServer) processProxyHeader(ctx *Context) {
+func (c *CoreServer) processProxyHeader(ctx *context.Context) {
 	if ctx.Request.RemoteAddr() == "" {
 		return
 	}
@@ -96,9 +98,9 @@ func (s *HuanProxyServer) processProxyHeader(ctx *Context) {
 	var host, proto string
 
 	if ctx.Request.Header().Get("Forwarded") != "" {
-		ProxyList, ForwardedList, host, proto = s.getProxyListForwarder(remoteIP, ctx.Request)
+		ProxyList, ForwardedList, host, proto = c.getProxyListForwarder(remoteIP, ctx.Request)
 	} else if ctx.Request.Header().Get("X-Forwarded-For") != "" {
-		ProxyList, ForwardedList, host, proto = s.getProxyListFromXForwardedFor(remoteIP, ctx.Request)
+		ProxyList, ForwardedList, host, proto = c.getProxyListFromXForwardedFor(remoteIP, ctx.Request)
 	} else {
 		host = ctx.Request.Header().Get("X-Forwarded-Host")
 		proto = ctx.Request.Header().Get("X-Forwarded-Proto")
@@ -130,7 +132,7 @@ func (s *HuanProxyServer) processProxyHeader(ctx *Context) {
 	ctx.ProxyRequest.Header.Set("X-Forwarded-Proto", proto)
 }
 
-func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *ReadOnlyRequest) ([]string, []string, string, string) {
+func (c *CoreServer) getProxyListForwarder(remoteIP net.IP, r *readonlyrequest.ReadOnlyRequest) ([]string, []string, string, string) {
 	ForwardedList := strings.Split(r.Header().Get("Forwarded"), ",")
 	ProxyList := make([]string, 0, len(ForwardedList)+1)
 	NewForwardedList := make([]string, 0, len(ForwardedList)+1)
@@ -174,7 +176,7 @@ func (s *HuanProxyServer) getProxyListForwarder(remoteIP net.IP, r *ReadOnlyRequ
 	return ProxyList, NewForwardedList, host, proto
 }
 
-func (s *HuanProxyServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *ReadOnlyRequest) ([]string, []string, string, string) {
+func (c *CoreServer) getProxyListFromXForwardedFor(remoteIP net.IP, r *readonlyrequest.ReadOnlyRequest) ([]string, []string, string, string) {
 	XFroWardedForList := strings.Split(r.Header().Get("X-Forwarded-For"), ",")
 	ProxyList := make([]string, 0, len(XFroWardedForList)+1)
 	NewForwardedList := make([]string, 0, len(XFroWardedForList)+1)

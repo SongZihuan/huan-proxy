@@ -1,4 +1,4 @@
-package server
+package core
 
 import (
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (s *HuanProxyServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Request) bool {
+func (c *CoreServer) matchURL(rule *rulescompile.RuleCompileConfig, r *http.Request) bool {
 	url := utils.ProcessURLPath(r.URL.Path)
 	if rule.MatchType == matchcompile.RegexMatch {
 		if rule.MatchRegex.MatchString(url) || rule.MatchRegex.MatchString(url+"/") {

@@ -1,4 +1,4 @@
-package server
+package readonlyrequest
 
 import (
 	"github.com/SongZihuan/huan-proxy/src/utils"

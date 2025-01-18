@@ -1,29 +1,30 @@
-package server
+package core
 
 import (
+	"github.com/SongZihuan/huan-proxy/src/server/context"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"net"
 )
 
-func (s *HuanProxyServer) checkProxyTrust(ctx *Context) bool {
+func (c *CoreServer) checkProxyTrust(ctx *context.Context) bool {
 	if !ctx.Rule.UseTrustedIPs {
 		return true
 	}
 
 	if ctx.Request.RemoteAddr() == "" {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return false
 	}
 
 	remoteIPStr, _, err := net.SplitHostPort(ctx.Request.RemoteAddr())
 	if err != nil {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return false
 	}
 
 	remoteIP := net.ParseIP(remoteIPStr)
 	if remoteIP == nil {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return false
 	}
 
@@ -45,6 +46,6 @@ func (s *HuanProxyServer) checkProxyTrust(ctx *Context) bool {
 		}
 	}
 
-	s.abortForbidden(ctx)
+	c.abortForbidden(ctx)
 	return false
 }

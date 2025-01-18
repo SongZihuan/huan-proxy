@@ -1,4 +1,4 @@
-package server
+package httpsserver
 
 import (
 	"context"
@@ -9,21 +9,13 @@ import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/certssl"
 	"github.com/SongZihuan/huan-proxy/src/config"
-	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
-	"github.com/SongZihuan/huan-proxy/src/flagparser"
 	"github.com/SongZihuan/huan-proxy/src/logger"
 	"net/http"
 	"sync"
 	"time"
 )
 
-var ServerStop = fmt.Errorf("server stop")
-
-type HTTPServer struct {
-	cfg     *config.HttpConfig
-	server  *http.Server
-	handler http.Handler
-}
+var ServerStop = fmt.Errorf("https server stop")
 
 type HTTPSServer struct {
 	cfg         *config.HttpsConfig
@@ -35,89 +27,21 @@ type HTTPSServer struct {
 	handler     http.Handler
 }
 
-type LogServer struct {
-	skip   map[string]struct{}
-	isTerm bool
-	writer func(msg string)
-}
-
-type HuanProxyServer struct {
-	http  HTTPServer
-	https HTTPSServer
-	LogServer
-}
-
-func NewHuanProxyServer() *HuanProxyServer {
-	if !flagparser.IsReady() || !config.IsReady() {
-		panic("not ready")
-	}
-
-	skip := make(map[string]struct{}, 10)
-	httpcfg := config.GetConfig().Http
+func NewHTTPSServer(handler http.Handler) *HTTPSServer {
 	httpscfg := config.GetConfig().Https
 
-	res := &HuanProxyServer{
-		http: HTTPServer{
-			cfg:    &httpcfg,
-			server: nil,
-		},
-
-		https: HTTPSServer{
-			cfg:    &httpscfg,
-			server: nil,
-		},
-
-		LogServer: LogServer{
-			skip:   skip,
-			isTerm: logger.IsInfoTermNotDumb(),
-			writer: logger.InfoWrite,
-		},
+	if httpscfg.Address == "" {
+		return nil
 	}
 
-	res.http.handler = res
-	res.https.handler = res
-
-	return res
-}
-
-func (s *HuanProxyServer) GetConfig() *config.YamlConfig {
-	// 不用检查Ready，因为在NewServer的时候已经检查过了
-	return config.GetConfig()
-}
-
-func (s *HuanProxyServer) GetRules() *rulescompile.RuleListCompileConfig {
-	// 不用检查Ready，因为在NewServer的时候已经检查过了
-	return config.GetRules()
-}
-
-func (s *HuanProxyServer) GetRulesList() []*rulescompile.RuleCompileConfig {
-	// 不用检查Ready，因为在NewServer的时候已经检查过了
-	return s.GetRules().Rules
-}
-
-func (s *HuanProxyServer) Run(httpschan chan error, httpchan chan error) (err error) {
-	if s.https.cfg.Address != "" {
-		err := s.https.loadHttps()
-		if err != nil {
-			return err
-		}
-
-		s.https.runHttps(httpschan)
+	return &HTTPSServer{
+		cfg:     &httpscfg,
+		server:  nil,
+		handler: handler,
 	}
-
-	if s.http.cfg.Address != "" {
-		err := s.http.loadHttp()
-		if err != nil {
-			return err
-		}
-
-		s.http.runHttp(httpchan)
-	}
-
-	return nil
 }
 
-func (s *HTTPSServer) loadHttps() error {
+func (s *HTTPSServer) LoadHttps() error {
 	privateKey, certificate, issuerCertificate, err := certssl.GetCertificateAndPrivateKey(s.cfg.SSLCertDir, s.cfg.SSLEmail, s.cfg.AliyunDNSAccessKey, s.cfg.AliyunDNSAccessSecret, s.cfg.SSLDomain)
 	if err != nil {
 		return fmt.Errorf("init htttps cert ssl server error: %s", err.Error())
@@ -164,7 +88,7 @@ func (s *HTTPSServer) reloadHttps() error {
 	return nil
 }
 
-func (s *HTTPSServer) runHttps(_httpschan chan error) chan error {
+func (s *HTTPSServer) RunHttps(_httpschan chan error) chan error {
 	_watchstopchan := make(chan bool)
 
 	s.watchCertificate(_watchstopchan)
@@ -239,32 +163,4 @@ func (s *HTTPSServer) watchCertificate(stopchan chan bool) {
 			}
 		}
 	}()
-}
-
-func (s *HTTPServer) loadHttp() error {
-	s.server = &http.Server{
-		Addr:    s.cfg.Address,
-		Handler: s.handler,
-	}
-	return nil
-}
-
-func (s *HTTPServer) runHttp(_httpschan chan error) chan error {
-	go func(httpschan chan error) {
-		logger.Infof("start http server in %s", s.cfg.Address)
-		err := s.server.ListenAndServe()
-		if err != nil && errors.Is(err, http.ErrServerClosed) {
-			httpschan <- ServerStop
-			return
-		} else if err != nil {
-			httpschan <- err
-			return
-		}
-	}(_httpschan)
-
-	return _httpschan
-}
-
-func (s *HuanProxyServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.LoggerServerHTTP(w, r, s.NormalServeHTTP)
 }

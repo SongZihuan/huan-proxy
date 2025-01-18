@@ -1,15 +1,16 @@
-package server
+package core
 
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/corscompile"
+	"github.com/SongZihuan/huan-proxy/src/server/context"
 	"net/http"
 )
 
-func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *Context) bool {
+func (c *CoreServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *context.Context) bool {
 	if corsRule.Ignore {
 		if ctx.Request.Method() == http.MethodOptions {
-			s.abortMethodNotAllowed(ctx)
+			c.abortMethodNotAllowed(ctx)
 			return false
 		} else {
 			return true
@@ -18,12 +19,12 @@ func (s *HuanProxyServer) cors(corsRule *corscompile.CorsCompileConfig, ctx *Con
 
 	origin := ctx.Request.Header().Get("Origin")
 	if origin == "" {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return false
 	}
 
 	if !corsRule.InOriginList(origin) {
-		s.abortForbidden(ctx)
+		c.abortForbidden(ctx)
 		return false
 	}
 
