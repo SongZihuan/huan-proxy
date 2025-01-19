@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/server/context"
@@ -36,14 +35,11 @@ func (c *CoreServer) CoreServeHTTP(writer http.ResponseWriter, r *http.Request) 
 				c.abortServerError(ctx)
 			}
 
-			fmt.Printf("ctx.Abort: %v\n", ctx.Abort)
-			fmt.Printf("config.GetConfig().NotAbort.IsEnable(false) = %v\n", config.GetConfig().NotAbort.IsEnable(false))
 			if ctx.Abort && config.GetConfig().NotAbort.IsEnable(false) {
 				_ = ctx.Reset()
 				continue RuleCycle
 			}
 
-			fmt.Println("TAG 6")
 			ctx.MustWriteToResponse()
 			return
 

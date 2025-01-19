@@ -91,7 +91,7 @@ func (r *ResponseWriter) Reset() error {
 
 	r.status = 0
 	r.buffer.Reset()
-	r.header = r.writer.Header()
+	r.header = r.writer.Header().Clone()
 	r.written = false
 
 	return nil
@@ -102,14 +102,11 @@ func (r *ResponseWriter) WriteToResponse() error {
 		return ErrHasWriter
 	}
 
-	if !r.writtenBody {
-		_, err := r.writer.Write(r.buffer.Bytes())
-		if err != nil {
-			return err
-		}
-		r.size = int64(r.buffer.Len())
-		r.buffer.Reset() // 清理
-		r.writtenBody = true
+	// status 抓鬼太吗最先写入
+	if !r.writtenStatus {
+		r.writer.WriteHeader(r.status)
+		r.writtenStatus = true
+		fmt.Printf("Write Status is: %d\n", r.status)
 	}
 
 	if !r.writtenHeader {
@@ -119,25 +116,28 @@ func (r *ResponseWriter) WriteToResponse() error {
 			copy(nh, h)
 			writerHeader[n] = nh
 		}
-		//
-		//	delHeader := make([]string, 0, 10)
-		//	for n, _ := range writerHeader {
-		//		if _, ok := r.header[n]; !ok {
-		//			delHeader = append(delHeader, n)
-		//		}
-		//	}
-		//
-		//	for _, n := range delHeader {
-		//		delete(writerHeader, n)
-		//	}
-		//	r.writtenHeader = false
+
+		delHeader := make([]string, 0, 10)
+		for n, _ := range writerHeader {
+			if _, ok := r.header[n]; !ok {
+				delHeader = append(delHeader, n)
+			}
+		}
+
+		for _, n := range delHeader {
+			delete(writerHeader, n)
+		}
+		r.writtenHeader = false
 	}
 
-	// status 放在最后写入
-	if !r.writtenStatus {
-		r.writer.WriteHeader(r.status)
-		r.writtenStatus = true
-		fmt.Printf("Write Status is: %d\n", r.status)
+	if !r.writtenBody {
+		_, err := r.writer.Write(r.buffer.Bytes())
+		if err != nil {
+			return err
+		}
+		r.size = int64(r.buffer.Len())
+		r.buffer.Reset() // 清理
+		r.writtenBody = true
 	}
 
 	r.written = true

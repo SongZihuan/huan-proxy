@@ -1,7 +1,6 @@
 package core
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/rewritecompile"
 	"github.com/SongZihuan/huan-proxy/src/server/context"
 	"net/url"
@@ -15,7 +14,6 @@ func (c *CoreServer) redirectServer(ctx *context.Context) {
 		return
 	}
 
-	fmt.Printf("target: %s\n", target)
 	c.statusRedirect(ctx, target, ctx.Rule.Redirect.Code)
 }
 
