@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
 	"github.com/SongZihuan/huan-proxy/src/flagparser"
@@ -41,13 +42,29 @@ func (c *CoreServer) GetRulesList() []*rulescompile.RuleCompileConfig {
 	return c.GetRules().Rules
 }
 
-func (c *CoreServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+type TestWriter struct {
+	http.ResponseWriter
+}
+
+func (t *TestWriter) WriteHeader(statusCode int) {
+	fmt.Println("WRITE HEADER CALL")
+	t.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (c *CoreServer) ServeHTTP(_w http.ResponseWriter, r *http.Request) {
+	w := &TestWriter{
+		ResponseWriter: _w,
+	}
+
 	writer := responsewriter.NewResponseWriter(w)
-
-	c.logger.ServeHTTP(writer, r, c.CoreServeHTTP)
-
+	writer.WriteHeader(http.StatusOK)
+	//
+	//c.logger.ServeHTTP(writer, r, c.CoreServeHTTP)
+	//
+	//fmt.Println("TAG 2")
 	err := writer.WriteToResponse()
 	if err != nil && !errors.Is(err, responsewriter.ErrHasWriter) {
-		writer.ServerError()
+		fmt.Printf("Err: %s", err.Error())
+		//writer.ServerError()
 	}
 }

@@ -49,6 +49,7 @@ func (ctx *Context) ProxyWriteToHttpRRequest() (*http.Request, error) {
 }
 
 func (ctx *Context) WriteToResponse() error {
+	fmt.Println("TAG 1")
 	err := ctx.Writer.WriteToResponse()
 	if err != nil {
 		return err
@@ -57,9 +58,8 @@ func (ctx *Context) WriteToResponse() error {
 }
 
 func (ctx *Context) MustWriteToResponse() {
-	fmt.Printf("Context call must write.\n")
+	fmt.Println("TAG 5")
 	ctx.Writer.MustWriteToResponse()
-	fmt.Printf("Context call must write finished.\n")
 }
 
 func (ctx *Context) Reset() error {

@@ -59,8 +59,8 @@ func (r *ResponseWriter) WriteHeader(statusCode int) {
 		return
 	}
 
-	fmt.Printf("Set Status is: %d\n", r.status)
 	r.status = statusCode
+	fmt.Printf("Set Status is: %d\n", r.status)
 }
 
 func (r *ResponseWriter) ServerError() {
@@ -119,18 +119,18 @@ func (r *ResponseWriter) WriteToResponse() error {
 			copy(nh, h)
 			writerHeader[n] = nh
 		}
-
-		delHeader := make([]string, 0, 10)
-		for n, _ := range writerHeader {
-			if _, ok := r.header[n]; !ok {
-				delHeader = append(delHeader, n)
-			}
-		}
-
-		for _, n := range delHeader {
-			delete(writerHeader, n)
-		}
-		r.writtenHeader = false
+		//
+		//	delHeader := make([]string, 0, 10)
+		//	for n, _ := range writerHeader {
+		//		if _, ok := r.header[n]; !ok {
+		//			delHeader = append(delHeader, n)
+		//		}
+		//	}
+		//
+		//	for _, n := range delHeader {
+		//		delete(writerHeader, n)
+		//	}
+		//	r.writtenHeader = false
 	}
 
 	// status 放在最后写入
@@ -145,6 +145,7 @@ func (r *ResponseWriter) WriteToResponse() error {
 }
 
 func (r *ResponseWriter) MustWriteToResponse() {
+	fmt.Println("TAG 4")
 	err := r.WriteToResponse()
 	if err == nil || errors.Is(err, ErrHasWriter) {
 		return

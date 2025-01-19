@@ -43,7 +43,7 @@ func (c *CoreServer) CoreServeHTTP(writer http.ResponseWriter, r *http.Request) 
 				continue RuleCycle
 			}
 
-			fmt.Printf("TAG A\n")
+			fmt.Println("TAG 6")
 			ctx.MustWriteToResponse()
 			return
 
