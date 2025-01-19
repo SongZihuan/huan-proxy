@@ -160,7 +160,6 @@ func (ls *LogServer) ServeHTTP(w http.ResponseWriter, r *http.Request, next http
 	// Process request
 	next(writer, r)
 
-	fmt.Println("TAG 3")
 	err := writer.WriteToResponse()
 	if err != nil && !errors.Is(err, responsewriter.ErrHasWriter) {
 		serverErr = true

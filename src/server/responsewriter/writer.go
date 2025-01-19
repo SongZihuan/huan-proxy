@@ -145,7 +145,6 @@ func (r *ResponseWriter) WriteToResponse() error {
 }
 
 func (r *ResponseWriter) MustWriteToResponse() {
-	fmt.Println("TAG 4")
 	err := r.WriteToResponse()
 	if err == nil || errors.Is(err, ErrHasWriter) {
 		return
