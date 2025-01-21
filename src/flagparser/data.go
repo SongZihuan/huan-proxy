@@ -6,7 +6,6 @@ import (
 	resource "github.com/SongZihuan/huan-proxy"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"io"
-	"os"
 	"reflect"
 	"strings"
 )
@@ -327,7 +326,7 @@ func (d *flagData) PrintLicense() (int, error) {
 func (d *flagData) FprintReport(writer io.Writer) (int, error) {
 	// 不需要title
 	report := utils.FormatTextToWidth(resource.Report, utils.NormalConsoleWidth)
-	return fmt.Fprintf(os.Stderr, "%s\n", report)
+	return fmt.Fprintf(writer, "%s\n", report)
 }
 
 func (d *flagData) PrintReport() (int, error) {
@@ -335,7 +334,7 @@ func (d *flagData) PrintReport() (int, error) {
 }
 
 func (d *flagData) FprintLF(writer io.Writer) (int, error) {
-	return fmt.Fprintf(os.Stderr, "\n")
+	return fmt.Fprintf(writer, "\n")
 }
 
 func (d *flagData) PrintLF() (int, error) {
