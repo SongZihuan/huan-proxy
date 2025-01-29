@@ -1,26 +1,21 @@
-package api
+package respheader
 
 const XHuanProxyHeaer = "X-Huan-Proxy"
 const ViaHeader = "Via"
+const ContentLength = "Content-Length"
 const TransferEncoding = "Transfer-Encoding"
 
-var WarningReqHeader = []string{
+var WarningRespHeader = []string{
 	"Host",
 	"Referer",
 	"User-Agent",
-	"Forwarded",
-	"Content-Length",
 	"Upgrade",
 	"Connection",
-	"X-Forwarded-For",
-	"X-Forwarded-Host",
-	"X-Forwarded-Proto",
-	"X-Real-Ip",
-	"X-Real-Port",
+	"Cache-Control",
 }
 
 func isNotGoodHeader(header string) bool {
-	for _, h := range WarningReqHeader {
+	for _, h := range WarningRespHeader {
 		if h == header {
 			return true
 		}

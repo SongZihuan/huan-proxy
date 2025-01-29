@@ -6,20 +6,20 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/utils"
 )
 
-type HeaderDelConfig struct {
+type ReqHeaderDelConfig struct {
 	Header string `yaml:"header"`
 }
 
-func (h *HeaderDelConfig) SetDefault() {
+func (h *ReqHeaderDelConfig) SetDefault() {
 
 }
 
-func (h *HeaderDelConfig) Check() configerr.ConfigError {
+func (h *ReqHeaderDelConfig) Check() configerr.ConfigError {
 	if h.Header == "" {
 		return configerr.NewConfigError("header name is empty")
 	}
 
-	if h.Header == ViaHeader || h.Header == XHuanProxyHeaer {
+	if h.Header == ViaHeader || h.Header == XHuanProxyHeaer || h.Header == TransferEncoding {
 		return configerr.NewConfigError(fmt.Sprintf("header %s use by http system", h.Header))
 	}
 

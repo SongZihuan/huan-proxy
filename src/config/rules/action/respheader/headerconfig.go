@@ -1,4 +1,4 @@
-package api
+package respheader
 
 import (
 	"fmt"
@@ -6,21 +6,21 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/utils"
 )
 
-type ReqHeaderConfig struct {
+type RespHeaderConfig struct {
 	Header string `yaml:"header"`
 	Value  string `yaml:"value"`
 }
 
-func (h *ReqHeaderConfig) SetDefault() {
+func (h *RespHeaderConfig) SetDefault() {
 
 }
 
-func (h *ReqHeaderConfig) Check() configerr.ConfigError {
+func (h *RespHeaderConfig) Check() configerr.ConfigError {
 	if h.Header == "" {
 		return configerr.NewConfigError("header name is empty")
 	}
 
-	if h.Header == ViaHeader || h.Header == XHuanProxyHeaer || h.Header == TransferEncoding {
+	if h.Header == ViaHeader || h.Header == XHuanProxyHeaer || h.Header == ContentLength || h.Header == TransferEncoding {
 		return configerr.NewConfigError(fmt.Sprintf("header %s use by http system", h.Header))
 	}
 

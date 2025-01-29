@@ -14,9 +14,9 @@ type RuleAPIConfig struct {
 	AddPath   string                `yaml:"addpath"`
 	SubPath   string                `yaml:"subpath"`
 	Rewrite   rewrite.RewriteConfig `yaml:"rewrite"`
-	HeaderSet []*HeaderConfig       `yaml:"headerset"`
-	HeaderAdd []*HeaderConfig       `yaml:"headeradd"`
-	HeaderDel []*HeaderDelConfig    `yaml:"headerdel"`
+	HeaderSet []*ReqHeaderConfig    `yaml:"headerset"`
+	HeaderAdd []*ReqHeaderConfig    `yaml:"headeradd"`
+	HeaderDel []*ReqHeaderDelConfig `yaml:"headerdel"`
 	QuerySet  []*QueryConfig        `yaml:"queryset"`
 	QueryAdd  []*QueryConfig        `yaml:"queryadd"`
 	QueryDel  []*QueryDelConfig     `yaml:"querydel"`
@@ -92,6 +92,48 @@ func (r *RuleAPIConfig) Check() configerr.ConfigError {
 	cfgErr := r.Rewrite.Check()
 	if cfgErr != nil && cfgErr.IsError() {
 		return cfgErr
+	}
+
+	for _, h := range r.HeaderSet {
+		err := h.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	}
+
+	for _, h := range r.HeaderAdd {
+		err := h.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	}
+
+	for _, h := range r.HeaderDel {
+		err := h.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	}
+
+	for _, q := range r.QuerySet {
+		err := q.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	}
+
+	for _, q := range r.QueryAdd {
+		err := q.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
+	}
+
+	for _, q := range r.QueryDel {
+		err := q.Check()
+		if err != nil && err.IsError() {
+			return err
+		}
 	}
 
 	return nil

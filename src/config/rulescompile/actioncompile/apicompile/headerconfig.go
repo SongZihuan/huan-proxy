@@ -2,13 +2,13 @@ package apicompile
 
 import "github.com/SongZihuan/huan-proxy/src/config/rules/action/api"
 
-type HeaderCompileConfig struct {
+type ReqHeaderCompileConfig struct {
 	Header string `yaml:"header"`
 	Value  string `yaml:"value"`
 }
 
-func NewHeaderCompileConfig(h *api.HeaderConfig) (*HeaderCompileConfig, error) {
-	return &HeaderCompileConfig{
+func NewReqHeaderCompileConfig(h *api.ReqHeaderConfig) (*ReqHeaderCompileConfig, error) {
+	return &ReqHeaderCompileConfig{
 		Header: h.Header,
 		Value:  h.Value,
 	}, nil

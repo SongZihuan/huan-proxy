@@ -40,6 +40,8 @@ func (c *CoreServer) CoreServeHTTP(writer http.ResponseWriter, r *http.Request) 
 				continue RuleCycle
 			}
 
+			c.WriteRespHeader(ctx)
+
 			ctx.MustWriteToResponse()
 			return
 

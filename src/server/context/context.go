@@ -3,6 +3,7 @@ package context
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/rulescompile"
+	"github.com/SongZihuan/huan-proxy/src/config/rulescompile/actioncompile/respheadercompile"
 	"github.com/SongZihuan/huan-proxy/src/server/request/proxyrequest"
 	"github.com/SongZihuan/huan-proxy/src/server/request/readonlyrequest"
 	"github.com/SongZihuan/huan-proxy/src/server/responsewriter"
@@ -17,6 +18,7 @@ type Context struct {
 	Request      *readonlyrequest.ReadOnlyRequest
 	ProxyRequest *proxyrequest.ProxyRequest
 	Rule         *rulescompile.RuleCompileConfig
+	RespHeader   *respheadercompile.SetRespHeaderCompileConfig
 }
 
 func NewContext(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *http.Request) *Context {
@@ -32,6 +34,7 @@ func NewContext(rule *rulescompile.RuleCompileConfig, w http.ResponseWriter, r *
 		Request:      readonlyrequest.NewReadOnlyRequest(r),
 		ProxyRequest: proxyRequest,
 		Rule:         rule,
+		RespHeader:   rule.RespHeader,
 	}
 }
 

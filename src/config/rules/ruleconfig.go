@@ -7,6 +7,7 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/file"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/redirect"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/action/remotetrust"
+	"github.com/SongZihuan/huan-proxy/src/config/rules/action/respheader"
 	"github.com/SongZihuan/huan-proxy/src/config/rules/match"
 )
 
@@ -23,10 +24,11 @@ type RuleConfig struct {
 	match.MatchConfig             `yaml:",inline"`
 	remotetrust.RemoteTrustConfig `yaml:",inline"`
 
-	File     file.RuleFileConfig         `yaml:"file"`
-	Dir      dir.RuleDirConfig           `yaml:"dir"`
-	Api      api.RuleAPIConfig           `yaml:"api"`
-	Redirect redirect.RuleRedirectConfig `yaml:"redirect"`
+	File       file.RuleFileConfig            `yaml:"file"`
+	Dir        dir.RuleDirConfig              `yaml:"dir"`
+	Api        api.RuleAPIConfig              `yaml:"api"`
+	Redirect   redirect.RuleRedirectConfig    `yaml:"redirect"`
+	RespHeader respheader.SetRespHeaderConfig `yaml:"respHeader"`
 }
 
 func (p *RuleConfig) SetDefault() {

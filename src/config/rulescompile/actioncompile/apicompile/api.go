@@ -17,9 +17,9 @@ type RuleAPICompileConfig struct {
 	AddPath   string
 	SubPath   string
 	Rewrite   *rewritecompile.RewriteCompileConfig
-	HeaderSet []*HeaderCompileConfig
-	HeaderAdd []*HeaderCompileConfig
-	HeaderDel []*HeaderDelCompileConfig
+	HeaderSet []*ReqHeaderCompileConfig
+	HeaderAdd []*ReqHeaderCompileConfig
+	HeaderDel []*ReqHeaderDelCompileConfig
 	QuerySet  []*QueryCompileConfig
 	QueryAdd  []*QueryCompileConfig
 	QueryDel  []*QueryDelCompileConfig
@@ -39,27 +39,27 @@ func NewRuleAPICompileConfig(r *api.RuleAPIConfig) (*RuleAPICompileConfig, error
 
 	server := httputil.NewSingleHostReverseProxy(targetURL)
 
-	HeaderSet := make([]*HeaderCompileConfig, 0, len(r.HeaderSet))
+	HeaderSet := make([]*ReqHeaderCompileConfig, 0, len(r.HeaderSet))
 	for _, v := range r.HeaderSet {
-		h, err := NewHeaderCompileConfig(v)
+		h, err := NewReqHeaderCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
 		HeaderSet = append(HeaderSet, h)
 	}
 
-	HeaderAdd := make([]*HeaderCompileConfig, 0, len(r.HeaderAdd))
+	HeaderAdd := make([]*ReqHeaderCompileConfig, 0, len(r.HeaderAdd))
 	for _, v := range r.HeaderAdd {
-		h, err := NewHeaderCompileConfig(v)
+		h, err := NewReqHeaderCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
 		HeaderAdd = append(HeaderAdd, h)
 	}
 
-	HeaderDel := make([]*HeaderDelCompileConfig, 0, len(r.HeaderDel))
+	HeaderDel := make([]*ReqHeaderDelCompileConfig, 0, len(r.HeaderDel))
 	for _, v := range r.HeaderDel {
-		h, err := NewHeaderDelCompileConfig(v)
+		h, err := NewReqHeaderDelCompileConfig(v)
 		if err != nil {
 			return nil, err
 		}
