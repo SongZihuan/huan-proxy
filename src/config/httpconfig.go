@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
-	"net/url"
 )
 
 type HttpConfig struct {
@@ -13,7 +11,7 @@ type HttpConfig struct {
 
 func (h *HttpConfig) SetDefault() {
 	if h.Address == "" {
-		return
+		h.Address = ":4022"
 	}
 
 	if h.StopWaitSecond <= 0 {
@@ -22,12 +20,5 @@ func (h *HttpConfig) SetDefault() {
 }
 
 func (h *HttpConfig) Check() configerr.ConfigError {
-	if h.Address == "" {
-		return nil
-	}
-
-	if _, err := url.Parse(h.Address); err != nil {
-		return configerr.NewConfigError(fmt.Sprintf("http address error: %s", err.Error()))
-	}
 	return nil
 }

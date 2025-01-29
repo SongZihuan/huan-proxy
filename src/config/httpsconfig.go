@@ -1,9 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/config/configerr"
-	"net/url"
 	"os"
 )
 
@@ -23,24 +21,22 @@ type HttpsConfig struct {
 }
 
 func (h *HttpsConfig) SetDefault() {
-	if h.Address == "" {
-		return
-	}
+	if h.Address != "" {
+		if h.SSLEmail == "" {
+			h.SSLEmail = "no-reply@example.com"
+		}
 
-	if h.SSLEmail == "" {
-		h.SSLEmail = "no-reply@example.com"
-	}
+		if h.SSLCertDir == "" {
+			h.SSLCertDir = "./ssl-certs"
+		}
 
-	if h.SSLCertDir == "" {
-		h.SSLCertDir = "./ssl-certs"
-	}
+		if h.AliyunDNSAccessKey == "" {
+			h.AliyunDNSAccessKey = os.Getenv(EnvAliyunKey)
+		}
 
-	if h.AliyunDNSAccessKey == "" {
-		h.AliyunDNSAccessKey = os.Getenv(EnvAliyunKey)
-	}
-
-	if h.AliyunDNSAccessSecret == "" {
-		h.AliyunDNSAccessKey = os.Getenv(EnvAliyunSecret)
+		if h.AliyunDNSAccessSecret == "" {
+			h.AliyunDNSAccessKey = os.Getenv(EnvAliyunSecret)
+		}
 	}
 
 	if h.StopWaitSecond <= 0 {
@@ -49,20 +45,14 @@ func (h *HttpsConfig) SetDefault() {
 }
 
 func (h *HttpsConfig) Check() configerr.ConfigError {
-	if h.Address == "" {
-		return nil
-	}
+	if h.Address != "" {
+		if h.SSLDomain == "" {
+			return configerr.NewConfigError("http ssl must has a domain")
+		}
 
-	if _, err := url.Parse(h.Address); err != nil {
-		return configerr.NewConfigError(fmt.Sprintf("http address error: %s", err.Error()))
-	}
-
-	if h.SSLDomain == "" {
-		return configerr.NewConfigError("http ssl must has a domain")
-	}
-
-	if h.AliyunDNSAccessKey == "" || h.AliyunDNSAccessSecret == "" {
-		return configerr.NewConfigError("http ssl must has a aliyun access key or secret")
+		if h.AliyunDNSAccessKey == "" || h.AliyunDNSAccessSecret == "" {
+			return configerr.NewConfigError("http ssl must has a aliyun access key or secret")
+		}
 	}
 
 	return nil
