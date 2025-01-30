@@ -13,7 +13,7 @@ const CertDefaultNewApplyTime = 5 * 24 * time.Hour
 
 func GetCertificateAndPrivateKey(basedir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string) (crypto.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
 	if email == "" {
-		email = "no-reply@example.com"
+		return nil, nil, nil, fmt.Errorf("email is empty")
 	}
 
 	if !utils.IsValidEmail(email) {
@@ -92,7 +92,7 @@ func WatchCertificate(dir string, email string, aliyunAccessKey string, aliyunAc
 
 func watchCertificate(dir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string, oldCert *x509.Certificate) (crypto.PrivateKey, *x509.Certificate, *x509.Certificate, error) {
 	if email == "" {
-		email = "no-reply@example.com"
+		return nil, nil, nil, fmt.Errorf("email is empty")
 	}
 
 	if !utils.IsValidEmail(email) {

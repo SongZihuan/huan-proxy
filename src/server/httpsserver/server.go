@@ -126,7 +126,7 @@ func (s *HTTPSServer) watchCertificate(stopchan chan bool) {
 	go func() {
 		err := certssl.WatchCertificate(s.cfg.SSLCertDir, s.cfg.SSLEmail, s.cfg.AliyunDNSAccessKey, s.cfg.AliyunDNSAccessSecret, s.cfg.SSLDomain, s.cert, stopchan, newchan)
 		if err != nil {
-			fmt.Printf("watch https cert server error: %s", err.Error())
+			logger.Errorf("watch https cert server error: %s", err.Error())
 		}
 	}()
 
@@ -137,7 +137,7 @@ func (s *HTTPSServer) watchCertificate(stopchan chan bool) {
 				close(newchan)
 				return
 			} else if res.Error != nil {
-				fmt.Printf("https cert reload server error: %s", res.Error.Error())
+				logger.Errorf("https cert reload server error: %s", res.Error.Error())
 			} else if res.PrivateKey != nil && res.Certificate != nil && res.IssuerCertificate != nil {
 				func() {
 					s.reloadMutex.Lock()
@@ -148,7 +148,7 @@ func (s *HTTPSServer) watchCertificate(stopchan chan bool) {
 
 					err := s.server.Shutdown(ctx)
 					if err != nil {
-						fmt.Printf("https server reload shutdown error: %s", err.Error())
+						logger.Errorf("https server reload shutdown error: %s", err.Error())
 					}
 
 					s.key = res.PrivateKey
@@ -157,7 +157,7 @@ func (s *HTTPSServer) watchCertificate(stopchan chan bool) {
 
 					err = s.reloadHttps()
 					if err != nil {
-						fmt.Printf("https server reload init error: %s", err.Error())
+						logger.Errorf("https server reload init error: %s", err.Error())
 					}
 				}()
 			}

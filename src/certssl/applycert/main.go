@@ -3,6 +3,7 @@ package applycert
 import (
 	"fmt"
 	"github.com/SongZihuan/huan-proxy/src/certssl/account"
+	"github.com/SongZihuan/huan-proxy/src/logger"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/certificate"
@@ -21,7 +22,7 @@ func ApplyCert(basedir string, email string, aliyunAccessKey string, aliyunAcces
 
 	user, err := account.LoadAccount(basedir, email)
 	if err != nil {
-		fmt.Printf("load local account failed, register a new on for %s: %s\n", email, err.Error())
+		logger.Infof("load local account failed, register a new on for %s: %s\n", email, err.Error())
 		user, err = account.NewAccount(basedir, email)
 		if err != nil {
 			return nil, fmt.Errorf("generate new user failed: %s", err.Error())

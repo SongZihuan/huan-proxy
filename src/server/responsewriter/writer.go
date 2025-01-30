@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/SongZihuan/huan-proxy/src/logger"
 	"net/http"
 )
 
@@ -60,7 +61,6 @@ func (r *ResponseWriter) WriteHeader(statusCode int) {
 	}
 
 	r.status = statusCode
-	fmt.Printf("Set Status is: %d\n", r.status)
 }
 
 func (r *ResponseWriter) ServerError() {
@@ -73,7 +73,7 @@ func (r *ResponseWriter) ServerError() {
 	r.writtenStatus = true
 	r.written = true
 
-	fmt.Printf("Server Error Status is: %d\n", r.status)
+	logger.Errorf("Server Error Status is: %d\n", r.status)
 }
 
 func (r *ResponseWriter) Header() http.Header {
@@ -106,7 +106,6 @@ func (r *ResponseWriter) WriteToResponse() error {
 	if !r.writtenStatus {
 		r.writer.WriteHeader(r.status)
 		r.writtenStatus = true
-		fmt.Printf("Write Status is: %d\n", r.status)
 	}
 
 	if !r.writtenHeader {
