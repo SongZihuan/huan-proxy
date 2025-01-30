@@ -16,7 +16,7 @@ type HttpsConfig struct {
 	SSLDomain             string `yaml:"ssldomain"`
 	SSLCertDir            string `yaml:"sslcertdir"`
 	AliyunDNSAccessKey    string `yaml:"aliyundnsaccesskey"`
-	AliyunDNSAccessSecret string `yaml:"aliyunDNSAccesssecret"`
+	AliyunDNSAccessSecret string `yaml:"aliyundnsaccesssecret"`
 	StopWaitSecond        int    `yaml:"stopwaitsecond"`
 }
 
