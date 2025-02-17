@@ -12,13 +12,14 @@ const (
 )
 
 type HttpsConfig struct {
-	Address               string `yaml:"address"`
-	SSLEmail              string `json:"sslemail"`
-	SSLDomain             string `yaml:"ssldomain"`
-	SSLCertDir            string `yaml:"sslcertdir"`
-	AliyunDNSAccessKey    string `yaml:"aliyundnsaccesskey"`
-	AliyunDNSAccessSecret string `yaml:"aliyundnsaccesssecret"`
-	StopWaitSecond        int    `yaml:"stopwaitsecond"`
+	Address               string           `yaml:"address"`
+	SSLEmail              string           `json:"ssl-email"`
+	SSLDomain             string           `yaml:"ssl-domain"`
+	SSLCertDir            string           `yaml:"ssl-cert-dir"`
+	AliyunDNSAccessKey    string           `yaml:"aliyun-dns-access-key"`
+	AliyunDNSAccessSecret string           `yaml:"aliyun-dns-access-secret"`
+	StopWaitSecond        int              `yaml:"stop-wait-second"`
+	ProxyProto            utils.StringBool `yaml:"proxy-proto"`
 }
 
 func (h *HttpsConfig) SetDefault() {
@@ -39,6 +40,8 @@ func (h *HttpsConfig) SetDefault() {
 	if h.StopWaitSecond <= 0 {
 		h.StopWaitSecond = 10
 	}
+
+	h.ProxyProto.SetDefaultEnable()
 }
 
 func (h *HttpsConfig) Check() configerr.ConfigError {

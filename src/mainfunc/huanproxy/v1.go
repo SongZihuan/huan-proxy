@@ -1,4 +1,4 @@
-package mainfunc
+package huanproxy
 
 import (
 	"errors"
@@ -12,6 +12,7 @@ import (
 	"github.com/SongZihuan/huan-proxy/src/server/httpsserver"
 	"github.com/SongZihuan/huan-proxy/src/utils"
 	"os"
+	"time"
 )
 
 func MainV1() int {
@@ -68,18 +69,22 @@ func MainV1() int {
 
 	ser := server.NewHuanProxyServer()
 
-	httpschan := make(chan error)
-	httpchan := make(chan error)
+	httpErrorChan := make(chan error)
+	httpsErrorChan := make(chan error)
 
-	err = ser.Run(httpschan, httpchan)
+	err = ser.Run(httpErrorChan, httpsErrorChan)
 	if err != nil {
 		return utils.ExitByErrorMsg(fmt.Sprintf("run http/https error: %s", err.Error()))
 	}
+	defer func() {
+		_ = ser.Stop()
+		time.Sleep(1 * time.Second)
+	}()
 
 	select {
 	case <-config.GetSignalChan():
 		return 0
-	case err := <-httpchan:
+	case err := <-httpErrorChan:
 		if errors.Is(err, httpserver.ServerStop) {
 			return 0
 		} else if err != nil {
@@ -87,7 +92,7 @@ func MainV1() int {
 		} else {
 			return 0
 		}
-	case err := <-httpschan:
+	case err := <-httpsErrorChan:
 		if errors.Is(err, httpsserver.ServerStop) {
 			return 0
 		} else if err != nil {

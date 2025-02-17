@@ -10,10 +10,10 @@ const CorsMaxAgeSec = 86400
 const CorsDefaultMaxAgeSec = CorsMaxAgeSec
 
 type CorsConfig struct {
-	AllowCors      utils.StringBool `yaml:"allowcors"`
-	AllowOrigin    []string         `yaml:"alloworigin"`
-	AllowOriginReg []string         `yaml:"alloworiginres"`
-	MaxAgeSec      int              `yaml:"maxagesec"`
+	AllowCors        utils.StringBool `yaml:"allow-cors"`
+	AllowOrigin      []string         `yaml:"allow-origin"`
+	AllowOriginRegex []string         `yaml:"allow-origin-regex"`
+	MaxAgeSec        int              `yaml:"max-age-sec"`
 }
 
 func (c *CorsConfig) SetDefault() {

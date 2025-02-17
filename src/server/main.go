@@ -34,14 +34,14 @@ func NewHuanProxyServer() *HuanProxyServer {
 	return res
 }
 
-func (s *HuanProxyServer) Run(httpschan chan error, httpchan chan error) (err error) {
+func (s *HuanProxyServer) Run(httpErrorChan chan error, httpsErrorChan chan error) (err error) {
 	if s.https != nil {
 		err := s.https.LoadHttps()
 		if err != nil {
 			return err
 		}
 
-		s.https.RunHttps(httpschan)
+		s.https.RunHttps(httpsErrorChan)
 	}
 
 	if s.http != nil {
@@ -50,7 +50,19 @@ func (s *HuanProxyServer) Run(httpschan chan error, httpchan chan error) (err er
 			return err
 		}
 
-		s.http.RunHttp(httpchan)
+		s.http.RunHttp(httpErrorChan)
+	}
+
+	return nil
+}
+
+func (s *HuanProxyServer) Stop() (err error) {
+	if s.http != nil {
+		_ = s.http.StopHttp()
+	}
+
+	if s.https != nil {
+		_ = s.https.StopHttps()
 	}
 
 	return nil

@@ -11,15 +11,15 @@ import (
 
 type RuleAPIConfig struct {
 	Address   string                `yaml:"address"`
-	AddPath   string                `yaml:"addpath"`
-	SubPath   string                `yaml:"subpath"`
+	AddPath   string                `yaml:"add-path"`
+	SubPath   string                `yaml:"sub-path"`
 	Rewrite   rewrite.RewriteConfig `yaml:"rewrite"`
-	HeaderSet []*ReqHeaderConfig    `yaml:"headerset"`
-	HeaderAdd []*ReqHeaderConfig    `yaml:"headeradd"`
-	HeaderDel []*ReqHeaderDelConfig `yaml:"headerdel"`
-	QuerySet  []*QueryConfig        `yaml:"queryset"`
-	QueryAdd  []*QueryConfig        `yaml:"queryadd"`
-	QueryDel  []*QueryDelConfig     `yaml:"querydel"`
+	HeaderSet []*ReqHeaderConfig    `yaml:"header-set"`
+	HeaderAdd []*ReqHeaderConfig    `yaml:"header-add"`
+	HeaderDel []*ReqHeaderDelConfig `yaml:"header-del"`
+	QuerySet  []*QueryConfig        `yaml:"query-set"`
+	QueryAdd  []*QueryConfig        `yaml:"query-add"`
+	QueryDel  []*QueryDelConfig     `yaml:"query-del"`
 	Via       string                `yaml:"via"`
 }
 

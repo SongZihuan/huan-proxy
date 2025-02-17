@@ -27,8 +27,8 @@ func NewCorsCompileConfig(c *cors.CorsConfig) (*CorsCompileConfig, error) {
 		}, nil
 	}
 
-	regexps := make([]*regexp.Regexp, 0, len(c.AllowOriginReg))
-	for _, v := range c.AllowOriginReg {
+	regexps := make([]*regexp.Regexp, 0, len(c.AllowOriginRegex))
+	for _, v := range c.AllowOriginRegex {
 		reg, err := regexp.Compile(v)
 		if err != nil {
 			return nil, err

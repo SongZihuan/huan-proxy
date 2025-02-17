@@ -5,9 +5,9 @@ import (
 )
 
 type SetRespHeaderConfig struct {
-	HeaderSet []*RespHeaderConfig    `yaml:"headerret"`
-	HeaderAdd []*RespHeaderConfig    `yaml:"headeradd"`
-	HeaderDel []*RespHeaderDelConfig `yaml:"headerdel"`
+	HeaderSet []*RespHeaderConfig    `yaml:"header-set"`
+	HeaderAdd []*RespHeaderConfig    `yaml:"header-add"`
+	HeaderDel []*RespHeaderDelConfig `yaml:"header-del"`
 }
 
 func (s *SetRespHeaderConfig) SetDefault() {

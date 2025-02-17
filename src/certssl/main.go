@@ -61,26 +61,22 @@ type NewCert struct {
 	Error             error
 }
 
-func WatchCertificate(dir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string, oldCert *x509.Certificate, stopchan chan bool, newchan chan NewCert) error {
+func WatchCertificate(dir string, email string, aliyunAccessKey string, aliyunAccessSecret string, domain string, oldCert *x509.Certificate, stopChan chan bool, newCertChan chan NewCert) error {
+	ticker := time.Tick(1 * time.Hour)
+
 	for {
 		select {
-		case <-stopchan:
-			newchan <- NewCert{
-				PrivateKey:  nil,
-				Certificate: nil,
-				Error:       nil,
-			}
-			close(stopchan)
+		case <-stopChan:
 			return nil
-		default:
+		case <-ticker:
 			privateKey, cert, cacert, err := watchCertificate(dir, email, aliyunAccessKey, aliyunAccessSecret, domain, oldCert)
 			if err != nil {
-				newchan <- NewCert{
+				newCertChan <- NewCert{
 					Error: fmt.Errorf("watch cert failed: %s", err.Error()),
 				}
 			} else if privateKey != nil && cert != nil && cacert != nil {
 				oldCert = cert
-				newchan <- NewCert{
+				newCertChan <- NewCert{
 					PrivateKey:        privateKey,
 					Certificate:       cert,
 					IssuerCertificate: cacert,

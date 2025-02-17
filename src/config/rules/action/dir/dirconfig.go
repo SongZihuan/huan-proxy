@@ -7,11 +7,11 @@ import (
 )
 
 type RuleDirConfig struct {
-	BasePath   string                `yaml:"basepath"`
-	IndexFile  []*IndexFileConfig    `yaml:"indexfile"`
-	IgnoreFile []*IgnoreFileConfig   `yaml:"ignorefile"`
-	AddPath    string                `yaml:"addpath"`
-	SubPath    string                `yaml:"subpath"`
+	BasePath   string                `yaml:"base-path"`
+	IndexFile  []*IndexFileConfig    `yaml:"index-file"`
+	IgnoreFile []*IgnoreFileConfig   `yaml:"ignore-file"`
+	AddPath    string                `yaml:"add-path"`
+	SubPath    string                `yaml:"sub-path"`
 	Rewrite    rewrite.RewriteConfig `yaml:"rewrite"`
 	Cors       cors.CorsConfig       `yaml:"cors"`
 }

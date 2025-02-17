@@ -8,7 +8,7 @@ type RemoteTrustCompileConfig struct {
 }
 
 func NewRemoteTrustCompileConfig(r *remotetrust.RemoteTrustConfig) (*RemoteTrustCompileConfig, error) {
-	if r.RemoteTrust.IsDisable(false) {
+	if r.RemoteTrusted.IsDisable(false) {
 		return &RemoteTrustCompileConfig{
 			UseTrustedIPs: false,
 			TrustedIPs:    make([]string, 0),

@@ -27,9 +27,9 @@ var levelMap = map[string]bool{
 
 type GlobalConfig struct {
 	Mode     string           `yaml:"mode"`
-	LogLevel string           `yaml:"loglevel"`
-	LogTag   utils.StringBool `yaml:"logtag"`
-	NotAbort utils.StringBool `yaml:"notabort"`
+	LogLevel string           `yaml:"log-level"`
+	LogTag   utils.StringBool `yaml:"log-tag"`
+	NotAbort utils.StringBool `yaml:"not-abort"`
 }
 
 func (g *GlobalConfig) SetDefault() {

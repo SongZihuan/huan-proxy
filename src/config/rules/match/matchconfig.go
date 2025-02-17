@@ -12,8 +12,8 @@ const (
 )
 
 type MatchConfig struct {
-	MatchType string `yaml:"matchtype"`
-	MatchPath string `yaml:"matchpath"`
+	MatchType string `yaml:"match-type"`
+	MatchPath string `yaml:"match-path"`
 }
 
 func (m *MatchConfig) SetDefault() {

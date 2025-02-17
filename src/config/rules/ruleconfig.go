@@ -28,7 +28,7 @@ type RuleConfig struct {
 	Dir        dir.RuleDirConfig              `yaml:"dir"`
 	Api        api.RuleAPIConfig              `yaml:"api"`
 	Redirect   redirect.RuleRedirectConfig    `yaml:"redirect"`
-	RespHeader respheader.SetRespHeaderConfig `yaml:"respHeader"`
+	RespHeader respheader.SetRespHeaderConfig `yaml:"response-header"`
 }
 
 func (p *RuleConfig) SetDefault() {

@@ -7,20 +7,20 @@ import (
 )
 
 type RemoteTrustConfig struct {
-	RemoteTrust utils.StringBool `yaml:"remotetrust"`
-	TrustedIPs  []string         `yaml:"trustedips"`
+	RemoteTrusted utils.StringBool `yaml:"remote-trusted"`
+	TrustedIPs    []string         `yaml:"trusted-ips"`
 }
 
 func (p *RemoteTrustConfig) SetDefault() {
-	p.RemoteTrust.SetDefaultDisable()
+	p.RemoteTrusted.SetDefaultDisable()
 
-	if p.RemoteTrust.IsEnable() && len(p.TrustedIPs) == 0 {
+	if p.RemoteTrusted.IsEnable() && len(p.TrustedIPs) == 0 {
 		p.TrustedIPs = []string{"127.0.0.0/8", "::1"}
 	}
 }
 
 func (p *RemoteTrustConfig) Check() configerr.ConfigError {
-	if p.RemoteTrust.IsEnable() {
+	if p.RemoteTrusted.IsEnable() {
 		for _, ip := range p.TrustedIPs {
 			if !utils.ValidIPv4(ip) && !utils.ValidIPv6(ip) && !utils.IsValidIPv4CIDR(ip) && !utils.IsValidIPv6CIDR(ip) {
 				return configerr.NewConfigError(fmt.Sprintf("bad proxy trusts ip address: %s", ip))
