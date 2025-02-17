@@ -46,7 +46,7 @@ func NewHTTPSServer(handler http.Handler) *HTTPSServer {
 func (s *HTTPSServer) LoadHttps() error {
 	privateKey, certificate, issuerCertificate, err := certssl.GetCertificateAndPrivateKey(s.cfg.SSLCertDir, s.cfg.SSLEmail, s.cfg.AliyunDNSAccessKey, s.cfg.AliyunDNSAccessSecret, s.cfg.SSLDomain)
 	if err != nil {
-		return fmt.Errorf("init htttps cert ssl server error: %s", err.Error())
+		return fmt.Errorf("init https cert ssl server error: %s", err.Error())
 	} else if privateKey == nil || certificate == nil || issuerCertificate == nil {
 		return fmt.Errorf("init https server error: get key and cert error, return nil, unknown reason")
 	}

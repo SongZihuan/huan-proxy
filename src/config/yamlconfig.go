@@ -21,6 +21,7 @@ func (y *YamlConfig) Init() error {
 func (y *YamlConfig) SetDefault() {
 	y.GlobalConfig.SetDefault()
 	y.Http.SetDefault()
+	y.Https.SetDefault()
 	y.RuleListConfig.SetDefault()
 }
 
@@ -31,6 +32,11 @@ func (y *YamlConfig) Check() (err configerr.ConfigError) {
 	}
 
 	err = y.Http.Check()
+	if err != nil && err.IsError() {
+		return err
+	}
+
+	err = y.Https.Check()
 	if err != nil && err.IsError() {
 		return err
 	}

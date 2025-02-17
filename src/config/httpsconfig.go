@@ -13,7 +13,7 @@ const (
 
 type HttpsConfig struct {
 	Address               string           `yaml:"address"`
-	SSLEmail              string           `json:"ssl-email"`
+	SSLEmail              string           `yaml:"ssl-email"`
 	SSLDomain             string           `yaml:"ssl-domain"`
 	SSLCertDir            string           `yaml:"ssl-cert-dir"`
 	AliyunDNSAccessKey    string           `yaml:"aliyun-dns-access-key"`
